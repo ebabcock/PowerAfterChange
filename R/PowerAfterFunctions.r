@@ -136,7 +136,7 @@ find_min_sites <- function(mB, nA,
 #' @param siteVar Name of the site variable in baseline data
 #' @param responseVar Name of the response variable in baseline data
 #'
-#' @returns
+#' @returns Estimated within-site standard deviation
 #' @export
 #'
 getSD_within <- function(baseline,siteVar="site",responseVar="y"){

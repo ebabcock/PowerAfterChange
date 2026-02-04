@@ -2,5 +2,6 @@
 
 export(find_min_sites)
 export(find_n_after)
+export(getSD_within)
 export(power_for_n_after)
 export(power_for_sites)
