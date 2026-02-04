@@ -7,3 +7,4 @@ pkgdown::build_site()
 
 #devtools::install_github("ebabcock/PowerAfterChange")
 
+vignette(pkgdown::metadata)
