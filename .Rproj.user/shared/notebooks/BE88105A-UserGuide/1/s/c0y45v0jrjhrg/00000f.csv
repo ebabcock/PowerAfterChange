@@ -1,0 +1,24 @@
+"0","site_res <- find_min_sites(mB = mB_demo, nA = 5,
+                           delta = delta_target,
+                           sd_w = sd_within_hat, sd_d = sd_delta,
+                           target_power = 0.8, alpha = 0.05,
+                           S_grid = 2:40, nsim = 3000, seed = 42)
+site_res <- find_min_sites(mB = mB_demo, nA = 5,
+                           delta = delta_target,
+                           sd_w = sd_within_hat, sd_d = sd_delta,
+                           target_power = 0.8, alpha = 0.05,
+                           S_grid = 2:40, nsim = 3000, seed = 42)
+site_res$S_star
+"
+"1","[1]"
+"1"," 13"
+"1","
+"
+"0","# Plot power curve for sites"
+"0","ggplot(site_res$curve, aes(x = S, y = power)) +"
+"0","  geom_line() +"
+"0","  geom_hline(yintercept = 0.8, linetype = ""dashed"", color = ""red"") +"
+"0","  geom_vline(xintercept = site_res$S_star, linetype = ""dashed"", color = ""blue"") +"
+"0","  labs(title = ""Power Curve for Number of Sites, known before and after samples"","
+"0","       x = ""Number of Sites"","
+"0","       y = ""Power"")"

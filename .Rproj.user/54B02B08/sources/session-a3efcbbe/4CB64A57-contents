@@ -1,0 +1,8 @@
+#usethis::use_pkgdown()
+devtools::check()
+devtools::load_all()
+devtools::document()
+devtools::build_readme()
+pkgdown::build_site()
+
+
