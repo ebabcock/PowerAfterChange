@@ -128,6 +128,17 @@ find_min_sites <- function(mB, nA,
   list(S_star = S_star, curve = out)
 }
 
+#' getSD_within
+#'
+#' Estimate within-site standard deviation from baseline data.
+#'
+#' @param baseline Data frame containing baseline measurements
+#' @param siteVar Name of the site variable in baseline data
+#' @param responseVar Name of the response variable in baseline data
+#'
+#' @returns
+#' @export
+#'
 getSD_within <- function(baseline,siteVar="site",responseVar="y"){
   sd_within_hat <- baseline %>%
     group_by(!!sym(siteVar)) %>%

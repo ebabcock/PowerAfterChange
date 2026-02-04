@@ -39,5 +39,6 @@ power_for_n_after(
 Estimated power for the given number of after measurements
 }
 \description{
-power_for_n_after
+Estimate power for a paired t-test on the average of a given number of
+measurements at a fixed number of sites before and after a changepoint.
 }

@@ -42,5 +42,6 @@ find_n_after(
 A list containing the minimum number of after measurements needed to achieve the target power and a data frame of the power curve
 }
 \description{
-find_n_after
+Function to find the minimum number of after measurements needed to achieve target
+power, for a paired t-test on the before and after means.
 }

@@ -42,5 +42,6 @@ find_min_sites(
 A list containing the minimum number of sites needed to achieve the target power and a data frame of the power curve
 }
 \description{
-find_min_sites
+Function to find the minimum number of sites needed to achieve target power from
+a paired t test on the means across observations at sites before and after a changepoint.
 }

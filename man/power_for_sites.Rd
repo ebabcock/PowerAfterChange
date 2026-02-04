@@ -39,5 +39,6 @@ power_for_sites(
 Estimated power for the given number of sites
 }
 \description{
-power_for_sites
+Function to estimate power for a paired t-test on the average of a given number
+of sites before and after a changepoint.
 }
