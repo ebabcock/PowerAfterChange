@@ -3,7 +3,7 @@
     "path": "~/GitHub/PowerAfterChange/R/PowerAfterFunctions.r",
     "project_path": "R/PowerAfterFunctions.r",
     "type": "r_source",
-    "hash": "1561191701",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1770238561278.0,
@@ -13,8 +13,8 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "140,2",
-        "scrollLine": "140"
+        "cursorPosition": "129,0",
+        "scrollLine": "125"
     },
     "folds": "",
     "lastKnownWriteTime": 1770244586,
