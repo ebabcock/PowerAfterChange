@@ -20,7 +20,8 @@ The following is a simulated data demo.
 
 ```{r}
 library(tidyverse)
-#source("R/PowerAfterFunctions.R")
+#devtools::install_github("ebabcock/PowerAfterChange")
+library(PowerAfterChange)
 ```
 
 # Simulate some data

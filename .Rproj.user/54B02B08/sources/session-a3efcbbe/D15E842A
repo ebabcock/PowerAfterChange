@@ -3,7 +3,7 @@
     "path": "~/GitHub/PowerAfterChange/Vignettes/UserGuide.Rmd",
     "project_path": "Vignettes/UserGuide.Rmd",
     "type": "r_markdown",
-    "hash": "0",
+    "hash": "4007325212",
     "contents": "",
     "dirty": false,
     "created": 1770238592019.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "20,6",
+        "cursorPosition": "22,34",
         "scrollLine": "17"
     },
     "folds": "",
-    "lastKnownWriteTime": 1770240239,
+    "lastKnownWriteTime": 1770241564,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1770240239815,
+    "last_content_update": 1770241564836,
     "read_only": false,
     "read_only_alternatives": []
 }

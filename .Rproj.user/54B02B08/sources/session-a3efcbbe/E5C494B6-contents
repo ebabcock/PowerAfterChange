@@ -18,7 +18,7 @@ Imports: stats, utils, generics, tidyverse, pwr, flextable, gridExtra
 Depends: 
     R (>= 4.0)
 LazyData: true
-URL: https://ebabcock.github.io/BycatchEstimator/
+URL: https://ebabcock.github.io/PowerAfterChange/
 Suggests: 
     knitr
 VignetteBuilder: knitr
