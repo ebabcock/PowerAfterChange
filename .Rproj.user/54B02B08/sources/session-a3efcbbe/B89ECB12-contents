@@ -1,6 +1,9 @@
 
 #' power_for_n_after
 #'
+#' Estimate power for a paired t-test on the average of a given number of
+#' measurements at a fixed number of sites before and after a changepoint.
+#'
 #' @param S Number of sites
 #' @param mB  Number of before measurements per site
 #' @param nA Number of after measurements per site
@@ -29,6 +32,9 @@ power_for_n_after <- function(S, mB, nA,
 }
 
 #' find_n_after
+#'
+#' Function to find the minimum number of after measurements needed to achieve target
+#' power, for a paired t-test on the before and after means.
 #'
 #' @param S Number of sites
 #' @param mB Number of before measurements per site
@@ -60,8 +66,10 @@ find_n_after <- function(S, mB,
   list(n_star = n_star, curve = out)
 }
 
-# Function to estimate power for a given number of sites
 #' power_for_sites
+#'
+#' Function to estimate power for a paired t-test on the average of a given number
+#' of sites before and after a changepoint.
 #'
 #' @param S Number of sites
 #' @param mB Number of before measurements per site
@@ -84,8 +92,10 @@ power_for_sites <- function(S, mB, nA,
                     alpha = alpha, nsim = nsim, seed = seed)
 }
 
-#Function to find the minimum number of sites (S) needed to achieve target power
 #' find_min_sites
+#'
+#' Function to find the minimum number of sites needed to achieve target power from
+#' a paired t test on the means across observations at sites before and after a changepoint.
 #'
 #' @param mB Number of before measurements per site
 #' @param nA Number of after measurements per site

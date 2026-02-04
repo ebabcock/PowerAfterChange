@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval=FALSE)
+knitr::opts_chunk$set(eval=TRUE)
 ```
 
 
@@ -18,12 +18,12 @@ These functions calculate power and sample size for a Before-After t-test with f
 
 Functions are based on Monte Carlo simulation of normal data.
 
-The functions were generated with the help of ChatGPT and GitHub copilot, 1/30/2026-2/4/2026.  
+The functions were generated with the help of ChatGPT and GitHub Copilot, 1/30/2026-2/4/2026.  
 
 The following is a simulated data demo. 
 
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 library(tidyverse)
 #devtools::install_github("ebabcock/PowerAfterChange")
 library(PowerAfterChange)
@@ -51,13 +51,15 @@ baseline_demo <- data.frame(
 We need the within-site standard deviation to plan the study. Here we estimate it from the baseline data.
 
 ```{r}
-sd_within_hat <-getSD_within(baseline = baseline_demo,"site","y")
+sd_within_hat <-getSD_within(baseline = baseline_demo,
+                             siteVar = "site",
+                             responseVar = "y")
 sd_within_hat
 ```
 
 ### Planning assumptions
 
-This is the change we want to be able to dectect with sufficient power.
+This is the change we want to be able to detect with sufficient power.
 
 ```{r}
 delta_target <- 1
