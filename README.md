@@ -20,4 +20,6 @@ devtools::install_github("ebabcock/PowerAfterChange")
 library(PowerAfterChange)
 ```
 
-See the user guide vignette for examples.
+See the user guide vignette at
+<https://ebabcock.github.io/PowerAfterChange> for a simulated data
+example.
