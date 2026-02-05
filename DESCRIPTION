@@ -20,6 +20,6 @@ Depends:
 LazyData: true
 URL: https://ebabcock.github.io/PowerAfterChange/
 Suggests: 
-    knitr
+    knitr, rmarkdown
 VignetteBuilder: knitr
 
