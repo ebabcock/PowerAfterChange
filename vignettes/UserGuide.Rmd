@@ -33,7 +33,7 @@ theme_set(theme_minimal())
 library(PowerAfterChange) #Library with all the new functions
 ```
 
-# Simulate some data
+## Simulate some data
 
 ```{r}
 set.seed(123) #for reproducibility
