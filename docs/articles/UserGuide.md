@@ -54,7 +54,7 @@ baseline_demo <- data.frame(
   mutate(y = rnorm(S_demo * nB_demo, mean = siteMean[site], sd = sd_within))
 ```
 
-#### Estimate within-site SD
+### Estimate within-site SD
 
 We need the within-site standard deviation for the power and sample size
 calculations. Here we estimate it from the baseline data. See
@@ -67,7 +67,9 @@ sd_within_hat <-getSD_within(baseline = baseline_demo,
 sd_within_hat
 ```
 
-#### Planning assumptions
+    ## [1] 1.671255
+
+### Planning assumptions
 
 This is the change we want to be able to detect with sufficient power.
 
@@ -76,7 +78,7 @@ delta_target <- 1  #change in the mean we want to detect
 sd_delta <- 0.5  #variability in true changes among sites
 ```
 
-#### (Question 1) Find minimum sites given before and after number known sample size
+### (Question 1) Find minimum sites given before and after number known sample size
 
 In this scenario, we know how many samples we have before and after the
 change, and want to know how many sites are needed to achieve target
@@ -93,7 +95,11 @@ site_res <- find_min_sites(nB = nB_demo, nA = 5,
                            S_grid = 2:40, nsim = 3000, seed = 42)
 
 site_res$S_star
+```
 
+    ## [1] 13
+
+``` r
 # Plot power curve for sites
 ggplot(site_res$curve, aes(x = S, y = power)) +
   geom_line() +
@@ -103,6 +109,8 @@ ggplot(site_res$curve, aes(x = S, y = power)) +
        x = "Number of Sites",
        y = "Power")
 ```
+
+![](UserGuide_files/figure-html/unnamed-chunk-5-1.png)
 
 The power curve shows how power increases with more samples after the
 change. The dashed red line indicates the target power (0.8), and the
@@ -132,6 +140,8 @@ sd_diff_hat <- getSD_difference(sd_within = sd_within_hat,
 sd_diff_hat
 ```
 
+    ## [1] 1.169289
+
 We can then use power.t.test to find the number of sites needed for the
 paired t-test.
 
@@ -145,6 +155,8 @@ power_result <- power.t.test(n = NULL,
                               alternative = "two.sided")
 power_result$n  #Number of sites needed
 ```
+
+    ## [1] 12.78393
 
 This matches the result from our simulation function find_min_sites.
 Here is the power curve.
@@ -177,7 +189,15 @@ ggplot(comparison_df, aes(x = n_sites)) +
   theme(legend.position = "bottom")
 ```
 
-### (Question 2) Find minimum n_after
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once per session.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+![](UserGuide_files/figure-html/unnamed-chunk-8-1.png)
+
+## (Question 2) Find minimum n_after
 
 In this scenario, we have a fixed number of sites and samples before the
 change, and want to know how many samples after the change are needed to
@@ -186,13 +206,29 @@ of samples after the change needed to achieve target power, given the
 number of sites and samples before the change.
 
 ``` r
-res_n_after <- find_n_after(S = S_demo, mB = mB_demo,
+res_n_after <- find_n_after(S = S_demo, nB = nB_demo,
                     delta = delta_target,
                     sd_w = sd_within_hat, sd_d = sd_delta,
                     target_power = 0.8, alpha = 0.05,
                     n_grid = 1:40, nsim = 3000, seed = 99)
 res_n_after$n_star  #Number of after samples need for specified power
+```
+
+    ## [1] 6
+
+``` r
 head(res_n_after$curve)
+```
+
+    ##   n_after     power
+    ## 1       1 0.3646667
+    ## 2       2 0.5600000
+    ## 3       3 0.6833333
+    ## 4       4 0.7100000
+    ## 5       5 0.7620000
+    ## 6       6 0.8070000
+
+``` r
 # Plot power curve for number of samples after
 ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
   geom_line() +
@@ -203,10 +239,11 @@ ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
        y = "Power") 
 ```
 
-The power curve shows how power increases with more samples after the
-change. The dashed red line indicates the target power (0.8), and the
-dashed blue line indicates the minimum number of after samples needed to
-achieve that power.
+![](UserGuide_files/figure-html/unnamed-chunk-9-1.png) The power curve
+shows how power increases with more samples after the change. The dashed
+red line indicates the target power (0.8), and the dashed blue line
+indicates the minimum number of after samples needed to achieve that
+power.
 
 Now, we repeat the calculation using the standard power.t.test function
 for comparison. The standard deviation of the difference between after
@@ -250,9 +287,11 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
   theme(legend.position = "bottom")
 ```
 
+![](UserGuide_files/figure-html/unnamed-chunk-10-1.png)
+
 This matches the result from our simulation function find_n_after.
 
-#### Conclusion
+### Conclusion
 
 The simulation-based functions produce results that align closely with
 the analytical solutions from power.t.test when the standard deviation

@@ -45,7 +45,7 @@ a paired t test on the means across observations at sites before and after a cha
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">find_min_sites</span><span class="op">(</span></span>
-<span>  <span class="va">mB</span>,</span>
+<span>  <span class="va">nB</span>,</span>
 <span>  <span class="va">nA</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  <span class="va">sd_w</span>,</span>
@@ -62,7 +62,11 @@ a paired t test on the means across observations at sites before and after a cha
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-na">nA<a class="anchor" aria-label="anchor" href="#arg-na"></a></dt>
+<dl><dt id="arg-nb">nB<a class="anchor" aria-label="anchor" href="#arg-nb"></a></dt>
+<dd><p>Number of before measurements per site</p></dd>
+
+
+<dt id="arg-na">nA<a class="anchor" aria-label="anchor" href="#arg-na"></a></dt>
 <dd><p>Number of after measurements per site</p></dd>
 
 
@@ -96,10 +100,6 @@ a paired t test on the means across observations at sites before and after a cha
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed for reproducibility</p></dd>
-
-
-<dt id="arg-nb">nB<a class="anchor" aria-label="anchor" href="#arg-nb"></a></dt>
-<dd><p>Number of before measurements per site</p></dd>
 
 </dl></div>
     <div class="section level2">

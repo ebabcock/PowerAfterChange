@@ -8,7 +8,7 @@ before and after a changepoint.
 
 ``` r
 find_min_sites(
-  mB,
+  nB,
   nA,
   delta,
   sd_w,
@@ -22,6 +22,10 @@ find_min_sites(
 ```
 
 ## Arguments
+
+- nB:
+
+  Number of before measurements per site
 
 - nA:
 
@@ -58,10 +62,6 @@ find_min_sites(
 - seed:
 
   Random seed for reproducibility
-
-- nB:
-
-  Number of before measurements per site
 
 ## Value
 
