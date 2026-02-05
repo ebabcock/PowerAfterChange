@@ -1,0 +1,46 @@
+This is the R package `PowerAfterChange` for calculating power and
+sample size for a Before-After t-test with fixed sites, repeated samples
+per site. Possible questions to ask are:
+
+1.  Given a fixed number of sites, samples per site before, and an
+    assumed effect size and variances, (a) how many samples per site
+    after are needed to achieve target power? or (b) what is the power
+    for a given number of samples per site after?
+
+2.  Given a fixed number of samples per site before and after, and an
+    assumed effect size and variances, (a) how many sites are needed to
+    achieve target power? and (b) what is the power for a given number
+    of sites?
+
+To load the project, run:
+
+``` r
+devtools::install_github("ebabcock/PowerAfterChange")
+library(PowerAfterChange)
+```
+
+See the user guide vignette at
+<https://ebabcock.github.io/PowerAfterChange> for a simulated data
+example.
+
+# Package index
+
+## All functions
+
+- [`find_min_sites()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_sites.md)
+  : find_min_sites
+- [`find_n_after()`](https://ebabcock.github.io/PowerAfterChange/reference/find_n_after.md)
+  : find_n_after
+- [`getSD_within()`](https://ebabcock.github.io/PowerAfterChange/reference/getSD_within.md)
+  : getSD_within
+- [`power_for_n_after()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_n_after.md)
+  : power_for_n_after
+- [`power_for_sites()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_sites.md)
+  : power_for_sites
+
+# Articles
+
+### All vignettes
+
+- [User guide for power after
+  change](https://ebabcock.github.io/PowerAfterChange/articles/UserGuide.md):
