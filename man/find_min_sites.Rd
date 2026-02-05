@@ -5,7 +5,7 @@
 \title{find_min_sites}
 \usage{
 find_min_sites(
-  mB,
+  nB,
   nA,
   delta,
   sd_w,
@@ -18,6 +18,8 @@ find_min_sites(
 )
 }
 \arguments{
+\item{nB}{Number of before measurements per site}
+
 \item{nA}{Number of after measurements per site}
 
 \item{delta}{Hypothesized mean change}
@@ -35,8 +37,6 @@ find_min_sites(
 \item{nsim}{Number of simulations to run}
 
 \item{seed}{Random seed for reproducibility}
-
-\item{nB}{Number of before measurements per site}
 }
 \value{
 A list containing the minimum number of sites needed to achieve the target power and a data frame of the power curve

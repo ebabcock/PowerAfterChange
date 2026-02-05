@@ -3,6 +3,7 @@
 export(find_min_sites)
 export(find_min_sites_analytical)
 export(find_n_after)
+export(getSD_difference)
 export(getSD_within)
 export(power_for_nA)
 export(power_for_n_after)
