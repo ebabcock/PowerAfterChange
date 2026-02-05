@@ -160,7 +160,7 @@ getSD_within <- function(baseline,siteVar="site",responseVar="y"){
 #'
 #' @returns Standard deviation of the difference in means
 #'
-#' @examples
+#' @export
 getSD_difference <- function(sd_within, nA, nB, sd_delta){
   sd_diff <- sqrt(sd_within^2*(1/nA + 1/nB) + sd_delta^2)
   return(sd_diff)
