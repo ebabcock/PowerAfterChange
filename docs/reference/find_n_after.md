@@ -8,7 +8,7 @@ achieve target power, for a paired t-test on the before and after means.
 ``` r
 find_n_after(
   S,
-  mB,
+  nB,
   delta,
   sd_w,
   sd_d = 0,
@@ -26,7 +26,7 @@ find_n_after(
 
   Number of sites
 
-- mB:
+- nB:
 
   Number of before measurements per site
 

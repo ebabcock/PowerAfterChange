@@ -6,7 +6,7 @@
 \usage{
 find_n_after(
   S,
-  mB,
+  nB,
   delta,
   sd_w,
   sd_d = 0,
@@ -20,7 +20,7 @@ find_n_after(
 \arguments{
 \item{S}{Number of sites}
 
-\item{mB}{Number of before measurements per site}
+\item{nB}{Number of before measurements per site}
 
 \item{delta}{Hypothesized mean change}
 

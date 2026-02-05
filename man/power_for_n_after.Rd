@@ -6,7 +6,7 @@
 \usage{
 power_for_n_after(
   S,
-  mB,
+  nB,
   nA,
   delta,
   sd_w,
@@ -19,7 +19,7 @@ power_for_n_after(
 \arguments{
 \item{S}{Number of sites}
 
-\item{mB}{Number of before measurements per site}
+\item{nB}{Number of before measurements per site}
 
 \item{nA}{Number of after measurements per site}
 

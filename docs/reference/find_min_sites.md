@@ -23,10 +23,6 @@ find_min_sites(
 
 ## Arguments
 
-- mB:
-
-  Number of before measurements per site
-
 - nA:
 
   Number of after measurements per site
@@ -62,6 +58,10 @@ find_min_sites(
 - seed:
 
   Random seed for reproducibility
+
+- nB:
+
+  Number of before measurements per site
 
 ## Value
 

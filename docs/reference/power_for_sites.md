@@ -8,7 +8,7 @@ number of sites before and after a changepoint.
 ``` r
 power_for_sites(
   S,
-  mB,
+  nB,
   nA,
   delta,
   sd_w,
@@ -25,7 +25,7 @@ power_for_sites(
 
   Number of sites
 
-- mB:
+- nB:
 
   Number of before measurements per site
 
