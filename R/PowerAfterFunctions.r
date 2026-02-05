@@ -111,7 +111,7 @@ power_for_sites <- function(S, nB, nA,
 #' @returns A list containing the minimum number of sites needed to achieve the target power and a data frame of the power curve
 #' @export
 #'
-find_min_sites <- function(mB, nA,
+find_min_sites <- function(nB, nA,
                            delta, sd_w, sd_d = 0,
                            target_power = 0.8,
                            alpha = 0.05,
