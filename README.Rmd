@@ -4,9 +4,10 @@ output: github_document
 
 This is the R package `PowerAfterChange` for calculating power and sample size for a Before-After t-test with fixed sites, repeated samples per site. Possible questions to ask are:
 
-(1) Given a fixed number of sites, samples per site before, and an assumed effect size and variances, (a) how many samples per site after are needed to achieve target power? or (b) what is the power for a given number of samples per site after?
+(1) Given a fixed number of samples per site before and after, and an assumed effect size and variances, (a) how many sites are needed to achieve target power? and (b) what is the power for a given number of sites?
 
-(2) Given a fixed number of samples per site before and after, and an assumed effect size and variances, (a) how many sites are needed to achieve target power? and (b) what is the power for a given number of sites?
+(2) Given a fixed number of sites, samples per site before, and an assumed effect size and variances, (a) how many samples per site after are needed to achieve target power? or (b) what is the power for a given number of samples per site after?
+
 
 To load the project, run:
 ```{r, eval=FALSE}
@@ -14,5 +15,5 @@ devtools::install_github("ebabcock/PowerAfterChange")
 library(PowerAfterChange)
 ```
 
-See the user guide vignette at https://ebabcock.github.io/PowerAfterChange for a simulated data example. 
+See the user guide vignette at ebabcock.github.io/PowerAfterChange for a simulated data example. 
 
