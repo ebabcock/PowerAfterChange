@@ -19,7 +19,7 @@ to ask are:
     action) to see the change with, for example, annual samples.
 
 Functions are based on Monte Carlo simulation of normal data and using
-the power.test function, to show that they are equivalent.
+the power.t.test function, to show that they are equivalent.
 
 The functions were generated with the help of ChatGPT and GitHub Copilot
 (various AI tools) 1/30/2026-2/5/2026.
@@ -37,7 +37,7 @@ theme_set(theme_minimal())
 library(PowerAfterChange) #Library with all the new functions
 ```
 
-## Simulate some data
+### Simulate some data
 
 ``` r
 set.seed(123) #for reproducibility
@@ -197,7 +197,7 @@ ggplot(comparison_df, aes(x = n_sites)) +
 
 ![](UserGuide_files/figure-html/unnamed-chunk-8-1.png)
 
-## (Question 2) Find minimum n_after
+### (Question 2) Find minimum n_after
 
 In this scenario, we have a fixed number of sites and samples before the
 change, and want to know how many samples after the change are needed to

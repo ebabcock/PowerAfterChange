@@ -20,7 +20,7 @@ These functions calculate power and sample size for a Before-After t-test with f
 
 (2) Given a fixed number of sites, samples per site before, and an assumed effect size and variances, (a) how many samples per site after are needed to achieve target power? or (b) what is the power for a given number of samples per site after? This addresses how long we would have to wait after a change (e.g. a restoration action) to see the change with, for example, annual samples. 
 
-Functions are based on Monte Carlo simulation of normal data and using the power.test function, to show that they are equivalent.
+Functions are based on Monte Carlo simulation of normal data and using the power.t.test function, to show that they are equivalent.
 
 The functions were generated with the help of ChatGPT and GitHub Copilot (various AI tools) 1/30/2026-2/5/2026.  
 
@@ -33,7 +33,7 @@ theme_set(theme_minimal())
 library(PowerAfterChange) #Library with all the new functions
 ```
 
-## Simulate some data
+### Simulate some data
 
 ```{r}
 set.seed(123) #for reproducibility
@@ -162,7 +162,7 @@ ggplot(comparison_df, aes(x = n_sites)) +
 ```
 
 
-## (Question 2) Find minimum n_after
+### (Question 2) Find minimum n_after
 
 In this scenario, we have a fixed number of sites and samples before the change, and want to know how many samples after the change are needed to achieve target power.The function res_n_after finds the minimum number of samples after the change needed to achieve target power, given the number of sites and samples before the change. 
 
