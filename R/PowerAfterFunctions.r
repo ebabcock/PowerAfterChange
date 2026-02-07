@@ -218,3 +218,35 @@ power_for_nA <- function(nA, S, nB, delta, sd_within, sd_delta, alpha){
                                alternative = "two.sided")
   return(power_result$power)
 }
+
+#' summarize_baseline
+#'
+#' Function to summarize baseline data to estimate within-site and between-site standard deviations, and number of before samples per site for power calculations.
+#'
+#' @param baseline Data frame containing baseline measurements
+#' @param siteVar Name of site variable
+#' @param responseVar Name of response variable
+#'
+#' @returns A data frame with estimated within-site standard deviation (sd_within), between-site standard deviation of site means (sd_between), number of sites (n_sites), and number of before samples per site (nB)
+#' @export
+#'
+summarize_baseline <- function(baseline,siteVar="site",responseVar="y"){
+  returnVal<-baseline %>%
+    group_by(!!sym(siteVar)) %>%
+    summarize(
+      site_mean = mean(!!sym(responseVar)),
+      site_sd = sd(!!sym(responseVar)),
+      n = n()
+    ) %>%
+    ungroup() %>%
+    summarize(sd_within = mean(site_sd),
+              sd_between = sd(site_mean),
+              n_sites = n(),
+              nB=if_else(length(unique(n))==1,unique(n)[1],NA)
+    )
+  if(any(is.na(returnVal$nB))){
+    warning("Number of before samples per site is not consistent across sites. nB is set to NA.")
+  }
+  return(returnVal)
+}
+>
