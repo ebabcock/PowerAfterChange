@@ -269,8 +269,10 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
 #' @param S Number of sites
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
-#' @param sd_within Within-site standard deviation (on the log scale)
-#' @param sd_delta Between-site SD of true changes (on the log scale)
+#' @param sd_within Within-site standard deviation
+#' @param sd_delta Between-site SD of true changes (default 0)
+#' @param logTransform Logical indicating whether to calculate the detectable change on the log scale (default TRUE)
+#' @param logAdd Value to add to response variable before log-transforming to avoid issues
 #' @param target_power Desired power (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #'
@@ -278,19 +280,22 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
 #' @export
 
 find_min_detectable_percent <- function(S, nB, nA,
-                                        sd_within, sd_delta = 0,
+                                        sd_within,
+                                        sd_delta = 0,
+                                        logTransform = FALSE,
+                                        logAdd=0,
                                         target_power = 0.8,
                                         alpha = 0.05) {
 
   # 1. Define the root-finding function for the log-delta
-  power_root_func <- function(log_delta) {
+  power_root_func <- function(delta) {
     # Calculate SD of the difference using your provided logic
     sd_diff <- getSD_difference(sd_within, nA, nB, sd_delta)
 
     # Analytical power for the log-difference
     current_power <- power.t.test(
       n = S,
-      delta = log_delta,
+      delta = delta,
       sd = sd_diff,
       sig.level = alpha,
       type = "one.sample",
@@ -301,13 +306,14 @@ find_min_detectable_percent <- function(S, nB, nA,
   }
 
   # 2. Find the required log_delta (searching between 0.001 and 5)
-  fit <- uniroot(power_root_func, interval = c(1e-4, 5))
+  fit <- uniroot(power_root_func, interval = c(1e-4, 5)) #solve equation
   log_delta_required <- fit$root
 
   # 3. Convert log-scale change back to a percentage
   # exp(log_delta) gives the ratio (e.g., 1.3).
   # (ratio - 1) * 100 gives the percent (e.g., 30)
-  percent_change <- (exp(log_delta_required) - 1) * 100
+  if(logTransform) percent_change <- (exp(log_delta_required) - logAdd ) * 100 else
+    percent_change <- log_delta_required * 100
 
   return(percent_change)
 }
