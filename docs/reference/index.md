@@ -20,3 +20,5 @@
   : power_for_n_after
 - [`power_for_sites()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_sites.md)
   : power_for_sites
+- [`summarize_baseline()`](https://ebabcock.github.io/PowerAfterChange/reference/summarize_baseline.md)
+  : summarize_baseline
