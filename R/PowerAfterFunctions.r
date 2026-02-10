@@ -258,3 +258,59 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
   }
   return(returnVal)
 }
+
+
+
+
+#' find_min_detectable_percent
+#'
+#' Calculates the smallest percentage change detectable for a given sample size.
+#'
+#' @param S Number of sites
+#' @param nB Number of before measurements per site
+#' @param nA Number of after measurements per site
+#' @param sd_within Within-site standard deviation (on the log scale)
+#' @param sd_delta Between-site SD of true changes (on the log scale)
+#' @param target_power Desired power (default 0.8)
+#' @param alpha Significance level (default 0.05)
+#'
+#' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
+#' @export
+
+find_min_detectable_percent <- function(S, nB, nA,
+                                        sd_within, sd_delta = 0,
+                                        target_power = 0.8,
+                                        alpha = 0.05) {
+
+  # 1. Define the root-finding function for the log-delta
+  power_root_func <- function(log_delta) {
+    # Calculate SD of the difference using your provided logic
+    sd_diff <- getSD_difference(sd_within, nA, nB, sd_delta)
+
+    # Analytical power for the log-difference
+    current_power <- power.t.test(
+      n = S,
+      delta = log_delta,
+      sd = sd_diff,
+      sig.level = alpha,
+      type = "one.sample",
+      alternative = "two.sided"
+    )$power
+
+    return(current_power - target_power)
+  }
+
+  # 2. Find the required log_delta (searching between 0.001 and 5)
+  fit <- uniroot(power_root_func, interval = c(1e-4, 5))
+  log_delta_required <- fit$root
+
+  # 3. Convert log-scale change back to a percentage
+  # exp(log_delta) gives the ratio (e.g., 1.3).
+  # (ratio - 1) * 100 gives the percent (e.g., 30)
+  percent_change <- (exp(log_delta_required) - 1) * 100
+
+  return(percent_change)
+}
+
+
+
