@@ -221,26 +221,35 @@ power_for_nA <- function(nA, S, nB, delta, sd_within, sd_delta, alpha){
 
 #' summarize_baseline
 #'
-#' Function to summarize baseline data to estimate within-site and between-site standard deviations, and number of before samples per site for power calculations.
+#' Summarize baseline data to estimate within-site and between-site standard deviations, and
+#' optionally log-transform the response variable to estimate these on the log scale.
 #'
 #' @param baseline Data frame containing baseline measurements
-#' @param siteVar Name of site variable
-#' @param responseVar Name of response variable
+#' @param siteVar Name of the site variable in baseline data
+#' @param responseVar Name of the response variable in baseline data
+#' @param logTransform Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale
+#' @param logAdd Value to add to response variable before log-transforming to avoid issues with zeros (default 0)
 #'
-#' @returns A data frame with estimated within-site standard deviation (sd_within), between-site standard deviation of site means (sd_between), number of sites (n_sites), and number of before samples per site (nB)
+#' @returns A data frame containing the estimated within-site and between-site standard deviations, and the number of sites and before samples per site
 #' @export
 #'
-summarize_baseline <- function(baseline,siteVar="site",responseVar="y"){
+summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
+                               logTransform=FALSE,
+                               logAdd=0){
   returnVal<-baseline %>%
     group_by(!!sym(siteVar)) %>%
     summarize(
       site_mean = mean(!!sym(responseVar)),
       site_sd = sd(!!sym(responseVar)),
+      site_logmean = if_else(logTransform, mean(log(!!sym(responseVar)+logAdd)), NA_real_),
+      site_logsd = if_else(logTransform, sd(log(!!sym(responseVar)+logAdd)), NA_real_),
       n = n()
     ) %>%
     ungroup() %>%
     summarize(sd_within = mean(site_sd),
               sd_between = sd(site_mean),
+              logsd_within = if_else(logTransform, mean(site_logsd), NA_real_),
+              logsd_between = if_else(logTransform, sd(site_logmean), NA_real_),
               n_sites = n(),
               nB=if_else(length(unique(n))==1,unique(n)[1],NA)
     )
@@ -249,4 +258,3 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y"){
   }
   return(returnVal)
 }
->
