@@ -58,7 +58,7 @@
                         <h4 data-toc-skip class="author">Beth
 Babcock</h4>
             
-            <h4 data-toc-skip class="date">2026-02-06</h4>
+            <h4 data-toc-skip class="date">2026-02-10</h4>
       
 
       <div class="d-none name"><code>UserGuide.Rmd</code></div>
@@ -109,7 +109,7 @@ using a normal distribution.</p>
 <span><span class="va">before_mean</span> <span class="op">&lt;-</span> <span class="fl">10</span> <span class="co">#overall mean before change</span></span>
 <span><span class="co">#simulate site to site variability</span></span>
 <span><span class="va">siteMean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">S_demo</span>, mean <span class="op">=</span> <span class="va">before_mean</span>, sd <span class="op">=</span> <span class="va">sd_between</span><span class="op">)</span></span>
-<span><span class="co">#Genarate baseline data (before change)</span></span>
+<span><span class="co">#Generate baseline data (before change)</span></span>
 <span><span class="va">baseline_demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  site <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">S_demo</span>, each <span class="op">=</span> <span class="va">nB_demo</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">S_demo</span> <span class="op">*</span> <span class="va">nB_demo</span>, mean <span class="op">=</span> <span class="va">siteMean</span><span class="op">[</span><span class="va">site</span><span class="op">]</span>, sd <span class="op">=</span> <span class="va">sd_within</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>

@@ -48,7 +48,7 @@ sd_between <- 1 #between-site standard deviation
 before_mean <- 10 #overall mean before change
 #simulate site to site variability
 siteMean <- rnorm(S_demo, mean = before_mean, sd = sd_between)
-#Genarate baseline data (before change)
+#Generate baseline data (before change)
 baseline_demo <- data.frame(
   site = rep(1:S_demo, each = nB_demo)) %>%
   mutate(y = rnorm(S_demo * nB_demo, mean = siteMean[site], sd = sd_within))
