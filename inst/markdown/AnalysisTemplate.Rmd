@@ -1,0 +1,217 @@
+---
+title: "Data analysis example"
+author: "Beth Babcock"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=TRUE)
+```
+
+```{r,message=FALSE}
+library(tidyverse)
+library(PowerAfterChange)
+theme_set(theme_bw())
+```
+
+
+### Read in some data
+
+```{r}
+fish<-read_csv("data/recent_fish.csv")
+head(fish)
+```
+
+### Calculate summary statistics
+
+The summarize_baseline function gives us the sd_within and sd_amoung sites in the baseline data, as well as the optionally log transformed values. 
+
+```{r}
+fishSumDry<-summarize_baseline(filter(fish,fSeason=="DRY"),
+                            siteVar ="Site",
+                            responseVar = "den",
+                            logTransform = TRUE,
+                            logAdd = 0.00001)
+fishSumDry
+
+                            
+```      
+
+
+### Planning assumptions
+
+This is the change we want to be able to detect with sufficient power. It can be on the log scale or the original scale depending on how we do the power calculation. Here we will do it on the log scale
+
+```{r}
+delta_target_log <- 0.3  #change in the mean we want to detect
+sd_delta_log <- 0.1  #variability in true changes among sites 
+nA_fixed <- 5  #number of samples after the change per site for fixed number of sites comparison
+
+```
+
+### (Question 1) Find minimum sites given before and after number known sample size
+
+In this scenario, we know how many samples we have before and after the change, and want to know how many sites are needed to achieve target power. This is equivalent to a paired t-test power calculation, and we will do it with both a simulation function and power.t.test.
+
+```{r}
+site_res <- find_min_sites(nB = fish, 
+                           nA = 5,
+                           delta = delta_target,
+                           sd_w = sd_within_hat, sd_d = sd_delta,
+                           target_power = 0.8, alpha = 0.05,
+                           S_grid = 2:40, nsim = 3000, seed = 42)
+
+site_res$S_star
+
+# Plot power curve for sites
+ggplot(site_res$curve, aes(x = S, y = power)) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = site_res$S_star, linetype = "dashed", color = "blue") +
+  labs(title = "Power Curve for Number of Sites, known before and after samples",
+       x = "Number of Sites",
+       y = "Power")
+
+
+```
+
+The power curve shows how power increases with more samples after the change. The dashed red line indicates the target power (0.8), and the dashed blue line indicates the minimum number of after samples needed to achieve that power.
+
+Now, we repeat the calculation using the standard power.t.test function for comparison.
+
+The standard deviation of the difference between after and before means per site is calculated as:
+$$s_{dif}=\sqrt{(sd_w^2(1/n_A + 1/n_B) + sd_d^2})$$
+
+ This combines:
+   - Within-site variance for after measurements: sd_w^2/nA
+   - Within-site variance for before measurements: sd_w^2/nB
+   - Between-site variance in true changes: sd_d^2
+
+The function getSD_difference makes this calculation. 
+
+```{r}
+sd_diff_hat <- getSD_difference(sd_within = sd_within_hat,
+                                 nA = 5,
+                                 nB = 5,
+                                 sd_delta = sd_delta)
+sd_diff_hat
+```
+
+We can then use power.t.test to find the number of sites needed for the paired t-test.
+
+```{r}
+power_result <- power.t.test(n = NULL,
+                              delta = delta_target,
+                              sd = sd_diff_hat,
+                              sig.level = 0.05,
+                              power = 0.8,
+                              type = "paired",
+                              alternative = "two.sided")
+power_result$n  #Number of sites needed
+```
+
+This matches the result from our simulation function find_min_sites. Here is the power curve. 
+
+```{r}
+comparison_df <- data.frame(
+  n_sites = site_res$curve$S,
+  power_analytical = find_min_sites_analytical(S_grid = site_res$curve$S,
+                                                     delta_target = delta_target,
+                                                     sd_diff = sd_diff_hat),
+  power_simulation = site_res$curve$power
+)
+
+# Plot comparison
+ggplot(comparison_df, aes(x = n_sites)) +
+  geom_line(aes(y = power_analytical, color = "power.t.test"), size = 1) +
+  geom_line(aes(y = power_simulation, color = "Simulation"), size = 1, linetype = "dashed") +
+  geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
+  geom_vline(xintercept = ceiling(power_result$n), linetype = "dotted", color = "blue", alpha = 0.5) +
+  geom_vline(xintercept = site_res$S_star, linetype = "dotted", color = "red", alpha = 0.5) +
+  labs(
+    title = "Comparison: power.t.test vs Simulation-Based Power",
+    subtitle = paste0("power.t.test: n=", ceiling(power_result$n), 
+                      " | Simulation: n=", site_res$S_star),
+    x = "Number of Sites",
+    y = "Power",
+    color = "Method"
+  ) +
+  scale_color_manual(values = c("power.t.test" = "blue", "Simulation" = "red")) +
+  theme(legend.position = "bottom")
+
+```
+
+
+### (Question 2) Find minimum n_after
+
+In this scenario, we have a fixed number of sites and samples before the change, and want to know how many samples after the change are needed to achieve target power.The function res_n_after finds the minimum number of samples after the change needed to achieve target power, given the number of sites and samples before the change. 
+
+```{r}
+res_n_after <- find_n_after(S = S_demo, nB = nB_demo,
+                    delta = delta_target,
+                    sd_w = sd_within_hat, sd_d = sd_delta,
+                    target_power = 0.8, alpha = 0.05,
+                    n_grid = 1:40, nsim = 3000, seed = 99)
+res_n_after$n_star  #Number of after samples need for specified power
+head(res_n_after$curve)
+# Plot power curve for number of samples after
+ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = res_n_after$n_star, linetype = "dashed", color = "blue") +
+  labs(title = "Power Curve for Before-After Design",
+       x = "Number of After Samples per Site",
+       y = "Power") 
+
+```
+The power curve shows how power increases with more samples after the change. The dashed red line indicates the target power (0.8), and the dashed blue line indicates the minimum number of after samples needed to achieve that power.
+
+Now, we repeat the calculation using the standard power.t.test function for comparison. The standard deviation of the difference between after and before means per site is calculated as before. 
+
+```{r}
+# Calculate power for a range of nA values
+nA_grid <- 1:40
+power_values <- sapply(nA_grid, function(nA) {
+  power_for_nA(nA, S = S_demo, nB = nB_demo, 
+               delta = delta_target,
+                sd_within = sd_within_hat,
+                sd_delta = sd_delta,
+                alpha = 0.05)
+})
+# Create a data frame for plotting
+comparison_nA_df <- data.frame(
+  n_after = nA_grid,
+  power_analytical = power_values,
+  power_simulation = res_n_after$curve$power
+)
+# Plot comparison
+ggplot(comparison_nA_df, aes(x = n_after)) +
+  geom_line(aes(y = power_analytical, color = "power.t.test"),
+            size = 1) +
+  geom_line(aes(y = power_simulation, color = "Simulation"),
+            size = 1, linetype = "dashed") +
+  geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
+  geom_vline(xintercept = ceiling(res_n_after$n_star),
+             linetype = "dotted", color = "red", alpha = 0.5) +
+  labs(
+    title = "Comparison: power.t.test vs Simulation-Based Power",
+    subtitle = paste0("power.t.test: nA=", ceiling(res_n_after$n_star
+    ), " | Simulation: nA=", res_n_after$n_star),
+    x = "Number of After Samples per Site",
+    y = "Power",
+    color = "Method"
+  ) +
+  scale_color_manual(values = c("power.t.test" = "blue",
+                                "Simulation" = "red")) +
+  theme(legend.position = "bottom")
+  
+```
+
+This matches the result from our simulation function find_n_after. 
+
+### Conclusion
+
+The simulation-based functions produce results that align closely with the analytical solutions from power.t.test when the standard deviation of the difference is calculated correctly. This validates the simulation approach for power and sample size calculations in Before-After designs with fixed sites and repeated samples per site. We can now add biological realism by using functions other than normal for the simulation, and adding more complex designs.
+
+
