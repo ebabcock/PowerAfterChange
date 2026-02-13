@@ -20,7 +20,7 @@ theme_set(theme_bw())
 
 ```{r}
 root <- rprojroot::find_package_root_file()
-fish <- read_csv(file.path(root, "data", "recent_fish.csv"))
+all_fish <- read_csv(file.path(root, "data", "all_fish.csv")) 
 head(fish)
 ggplot(fish, aes(x = factor(Site), y = den)) +
   geom_violin() +

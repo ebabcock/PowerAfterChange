@@ -19,7 +19,8 @@
 #'
 power_for_n_after <- function(S, nB, nA,
                               delta, sd_w, sd_d = 0,
-                              alpha = 0.05, nsim = 2000, seed = 1) {
+                              alpha = 0.05, nsim = 2000,
+                              seed = 1) {
   set.seed(seed)
   pvals <- replicate(nsim, {
     true_change <- rnorm(S, mean = delta, sd = sd_d)
@@ -269,7 +270,7 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
 #' @param S Number of sites
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
-#' @param sd_within Within-site standard deviation
+#' @param sd_within Within-site standard deviation (log calculated if logTransform=TRUE)
 #' @param sd_delta Between-site SD of true changes (default 0)
 #' @param logTransform Logical indicating whether to calculate the detectable change on the log scale (default TRUE)
 #' @param logAdd Value to add to response variable before log-transforming to avoid issues
