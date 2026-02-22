@@ -20,11 +20,15 @@ These functions calculate power and sample size for a Before-After t-test with f
 
 (2) Given a fixed number of sites, samples per site before, and an assumed effect size and variances, (a) how many samples per site after are needed to achieve target power? or (b) what is the power for a given number of samples per site after? This addresses how long we would have to wait after a change (e.g. a restoration action) to see the change with, for example, annual samples. 
 
+(3) Given a fixed number of sites, samples before and after, and an assumed variance, what is the minimum detectable percent change? This addresses how big of a change we would be able to detect with a given sampling design.
+
 Functions are based on Monte Carlo simulation of normal data and using the power.t.test function, to show that they are equivalent.
 
-The functions were generated with the help of ChatGPT and GitHub Copilot (various AI tools) 1/30/2026-2/5/2026.  
+The functions were generated with the help of ChatGPT and GitHub Copilot (various AI tools) 1/30/2026-2/21/2026.  
 
-The following is a simulated data demo. The simulated data is data before the change, and we use this data to get an estimate of the within-site standard deviation needed for planning. The data are simulated with site-to-site variability and within-site variability, using a normal distribution.
+The following is a simulated data demo. The simulated data is data before the change, and we use this data to get an estimate of the within-site standard deviation needed for planning. The data are simulated with site-to-site variability and within-site variability, using a normal distribution. 
+
+The functions in `PowerAfterChange` are designed to be flexible and can be used with negative binomial and binomial distributions, and normal wiht and without log-transformation, but here we show the normal case with no log transformation for simplicity and to compare with power.t.test.
 
 ```{r,message=FALSE,warning=FALSE}
 library(tidyverse)
@@ -192,7 +196,7 @@ Now, we repeat the calculation using the standard power.t.test function for comp
 # Calculate power for a range of nA values
 nA_grid <- 1:40
 power_values <- sapply(nA_grid, function(nA) {
-  power_for_nA(nA, S = S_demo, nB = nB_demo, 
+  power_for_nA_analytical(nA, S = S_demo, nB = nB_demo, 
                delta = delta_target,
                 sd_within = sd_within_hat,
                 sd_delta = sd_delta,
@@ -278,8 +282,110 @@ ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
   )
 ```
 
-### Conclusion
+### Conclusion on paired t-test
 
 The simulation-based functions produce results that align closely with the analytical solutions from power.t.test when the standard deviation of the difference is calculated correctly. This validates the simulation approach for power and sample size calculations in Before-After designs with fixed sites and repeated samples per site. We can now add biological realism by using functions other than normal for the simulation, and adding more complex designs.
 
+### (Question 4) Wilcoxon test (nonparametric) using the same simulated data
 
+Here we repeat the three planning questions using the Wilcoxon signed-rank test
+instead of the paired t-test. These calculations use simulation (`useTest = "wilcoxon"`).
+
+```{r}
+# (a) Minimum sites with Wilcoxon test
+site_res_wilcox <- find_min_sites(
+  nB = nB_demo, nA = 5,
+  delta = delta_target,
+  sd_w = sd_within_hat, sd_d = sd_delta,
+  target_power = 0.8, alpha = 0.05,
+  S_grid = 2:40, nsim = 3000, seed = 42,
+  useTest = "wilcoxon"
+)
+
+site_res_wilcox$S_star
+
+ggplot(site_res_wilcox$curve, aes(x = S, y = power)) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = site_res_wilcox$S_star, linetype = "dashed", color = "blue") +
+  labs(
+    title = "Wilcoxon Power Curve for Number of Sites",
+    x = "Number of Sites",
+    y = "Power"
+  )
+```
+
+```{r}
+# (b) Minimum n_after with Wilcoxon test
+res_n_after_wilcox <- find_n_after(
+  S = S_demo, nB = nB_demo,
+  delta = delta_target,
+  sd_w = sd_within_hat, sd_d = sd_delta,
+  target_power = 0.8, alpha = 0.05,
+  n_grid = 1:40, nsim = 3000, seed = 99,
+  useTest = "wilcoxon"
+)
+
+res_n_after_wilcox$n_star
+
+ggplot(res_n_after_wilcox$curve, aes(x = n_after, y = power)) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = res_n_after_wilcox$n_star, linetype = "dashed", color = "blue") +
+  labs(
+    title = "Wilcoxon Power Curve for After Samples",
+    x = "Number of After Samples per Site",
+    y = "Power"
+  )
+```
+
+```{r}
+# (c) Minimum detectable percent change with Wilcoxon test
+min_detectable_pct_wilcox <- find_min_detectable_percent(
+  S = S_demo,
+  nB = nB_demo,
+  nA = 5,
+  sd_within = sd_within_hat,
+  sd_delta = sd_delta,
+  logTransform = FALSE,
+  target_power = 0.8,
+  alpha = 0.05,
+  useTest = "wilcoxon",
+  nsim = 3000,
+  seed = 123
+)
+
+min_detectable_pct_wilcox
+```
+
+```{r}
+# Plot minimum detectable percent change across nA using Wilcoxon
+nA_grid <- 1:40
+detectable_wilcox_df <- data.frame(
+  n_after = nA_grid,
+  min_detectable_percent = sapply(nA_grid, function(nA) {
+    find_min_detectable_percent(
+      S = S_demo,
+      nB = nB_demo,
+      nA = nA,
+      sd_within = sd_within_hat,
+      sd_delta = sd_delta,
+      logTransform = FALSE,
+      target_power = 0.8,
+      alpha = 0.05,
+      useTest = "wilcoxon",
+      nsim = 2000,
+      seed = 123
+    )
+  })
+)
+
+ggplot(detectable_wilcox_df, aes(x = n_after, y = min_detectable_percent)) +
+  geom_line() +
+  geom_hline(yintercept = min_detectable_pct_wilcox, linetype = "dashed", color = "red") +
+  labs(
+    title = "Wilcoxon Minimum Detectable Percent Change vs. After Samples",
+    x = "Number of After Samples per Site",
+    y = "Minimum Detectable Percent Change"
+  )
+```
