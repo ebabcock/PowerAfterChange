@@ -78,6 +78,8 @@ sd_within_hat <-getSD_within(baseline = baseline_demo,
 sd_within_hat
 ```
 
+    ## [1] 1.671255
+
 ### Planning assumptions
 
 This is the change we want to be able to detect with sufficient power.
@@ -104,7 +106,11 @@ site_res <- find_min_sites(nB = nB_demo, nA = 5,
                            S_grid = 2:40, nsim = 3000, seed = 42)
 
 site_res$S_star
+```
 
+    ## [1] 13
+
+``` r
 # Plot power curve for sites
 ggplot(site_res$curve, aes(x = S, y = power)) +
   geom_line() +
@@ -114,6 +120,8 @@ ggplot(site_res$curve, aes(x = S, y = power)) +
        x = "Number of Sites",
        y = "Power")
 ```
+
+![](UserGuide_files/figure-html/unnamed-chunk-5-1.png)
 
 The power curve shows how power increases with more samples after the
 change. The dashed red line indicates the target power (0.8), and the
@@ -141,6 +149,8 @@ sd_diff_hat <- getSD_difference(sd_within = sd_within_hat,
 sd_diff_hat
 ```
 
+    ## [1] 1.169289
+
 We can then use power.t.test to find the number of sites needed for the
 paired t-test.
 
@@ -154,6 +164,8 @@ power_result <- power.t.test(n = NULL,
                               alternative = "two.sided")
 power_result$n  #Number of sites needed
 ```
+
+    ## [1] 12.78393
 
 This matches the result from our simulation function find_min_sites.
 Here is the power curve.
@@ -186,6 +198,8 @@ ggplot(comparison_df, aes(x = n_sites)) +
   theme(legend.position = "bottom")
 ```
 
+![](UserGuide_files/figure-html/unnamed-chunk-8-1.png)
+
 ### (Question 2) Find minimum n_after
 
 In this scenario, we have a fixed number of sites and samples before the
@@ -201,7 +215,23 @@ res_n_after <- find_n_after(S = S_demo, nB = nB_demo,
                     target_power = 0.8, alpha = 0.05,
                     n_grid = 1:40, nsim = 3000, seed = 99)
 res_n_after$n_star  #Number of after samples need for specified power
+```
+
+    ## [1] 6
+
+``` r
 head(res_n_after$curve)
+```
+
+    ##   n_after     power
+    ## 1       1 0.3646667
+    ## 2       2 0.5600000
+    ## 3       3 0.6833333
+    ## 4       4 0.7100000
+    ## 5       5 0.7620000
+    ## 6       6 0.8070000
+
+``` r
 # Plot power curve for number of samples after
 ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
   geom_line() +
@@ -212,10 +242,11 @@ ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
        y = "Power") 
 ```
 
-The power curve shows how power increases with more samples after the
-change. The dashed red line indicates the target power (0.8), and the
-dashed blue line indicates the minimum number of after samples needed to
-achieve that power.
+![](UserGuide_files/figure-html/unnamed-chunk-9-1.png) The power curve
+shows how power increases with more samples after the change. The dashed
+red line indicates the target power (0.8), and the dashed blue line
+indicates the minimum number of after samples needed to achieve that
+power.
 
 Now, we repeat the calculation using the standard power.t.test function
 for comparison. The standard deviation of the difference between after
@@ -259,6 +290,11 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
   theme(legend.position = "bottom")
 ```
 
+    ## Warning: Duplicated aesthetics after name standardisation:
+    ## linetype
+
+![](UserGuide_files/figure-html/unnamed-chunk-10-1.png)
+
 This matches the result from our simulation function find_n_after.
 
 ### (Question 3) Minimum detectable percent change
@@ -282,6 +318,8 @@ min_detectable_pct <- find_min_detectable_percent(
 
 min_detectable_pct
 ```
+
+    ## [1] 103.9095
 
 Plot detectable percent change over a range of nA values
 
@@ -313,6 +351,8 @@ ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
   )
 ```
 
+![](UserGuide_files/figure-html/unnamed-chunk-12-1.png)
+
 Plot power vs. minimum detectable percent change over a range of nA
 values
 
@@ -340,6 +380,8 @@ ggplot(inputGrid, aes(x = nA, y = power, color = factor(percent_change))) +
     x = "After Samples (nA)"
   ) 
 ```
+
+![](UserGuide_files/figure-html/unnamed-chunk-13-1.png)
 
 ### Conclusion on paired t-test
 
@@ -369,7 +411,11 @@ site_res_wilcox <- find_min_sites(
 )
 
 site_res_wilcox$S_star
+```
 
+    ## [1] 13
+
+``` r
 ggplot(site_res_wilcox$curve, aes(x = S, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -380,6 +426,8 @@ ggplot(site_res_wilcox$curve, aes(x = S, y = power)) +
     y = "Power"
   )
 ```
+
+![](UserGuide_files/figure-html/unnamed-chunk-14-1.png)
 
 ``` r
 # (b) Minimum n_after with Wilcoxon test
@@ -393,7 +441,11 @@ res_n_after_wilcox <- find_n_after(
 )
 
 res_n_after_wilcox$n_star
+```
 
+    ## [1] 9
+
+``` r
 ggplot(res_n_after_wilcox$curve, aes(x = n_after, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -404,3 +456,5 @@ ggplot(res_n_after_wilcox$curve, aes(x = n_after, y = power)) +
     y = "Power"
   )
 ```
+
+![](UserGuide_files/figure-html/unnamed-chunk-15-1.png)
