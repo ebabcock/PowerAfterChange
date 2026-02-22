@@ -33,7 +33,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/UserGuide.html">User guide for power after change</a></li>
+<li><a class="dropdown-item" href="../articles/NonNormalDistributionsAndTests.html">PowerAfterChange: Simulation Tests for Alternative Distributions and Tests</a></li>
+    <li><a class="dropdown-item" href="../articles/UserGuide.html">User guide for power after change</a></li>
   </ul>
 </li>
       </ul>
@@ -82,21 +83,30 @@ are needed to achieve target power? or (b) what is the power for a given
 number of samples per site after? This addresses how long we would have
 to wait after a change (e.g. a restoration action) to see the change
 with, for example, annual samples.</p></li>
+<li><p>Given a fixed number of sites, samples before and after, and an
+assumed variance, what is the minimum detectable percent change? This
+addresses how big of a change we would be able to detect with a given
+sampling design.</p></li>
 </ol>
 <p>Functions are based on Monte Carlo simulation of normal data and
 using the power.t.test function, to show that they are equivalent.</p>
 <p>The functions were generated with the help of ChatGPT and GitHub
-Copilot (various AI tools) 1/30/2026-2/5/2026.</p>
+Copilot (various AI tools) 1/30/2026-2/21/2026.</p>
 <p>The following is a simulated data demo. The simulated data is data
 before the change, and we use this data to get an estimate of the
 within-site standard deviation needed for planning. The data are
 simulated with site-to-site variability and within-site variability,
 using a normal distribution.</p>
+<p>The functions in <code>PowerAfterChange</code> are designed to be
+flexible and can be used with negative binomial and binomial
+distributions, and normal wiht and without log-transformation, but here
+we show the normal case with no log transformation for simplicity and to
+compare with power.t.test.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#devtools::install_github("ebabcock/PowerAfterChange")</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ebabcock.github.io/PowerAfterChange/">PowerAfterChange</a></span><span class="op">)</span> <span class="co">#Library with all the new functions</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ebabcock.github.io/PowerAfterChange/">PowerAfterChange</a></span><span class="op">)</span> <span class="co">#Library with functions for analysis</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="simulate-some-data">Simulate some data<a class="anchor" aria-label="anchor" href="#simulate-some-data"></a>
 </h3>
@@ -125,14 +135,13 @@ getSD_within function in PowerAfterFunctions for the code.</p>
 <span>                             siteVar <span class="op">=</span> <span class="st">"site"</span>,</span>
 <span>                             responseVar <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span>
 <span><span class="va">sd_within_hat</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 1.671255</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="planning-assumptions">Planning assumptions<a class="anchor" aria-label="anchor" href="#planning-assumptions"></a>
 </h3>
 <p>This is the change we want to be able to detect with sufficient
 power.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">delta_target</span> <span class="op">&lt;-</span> <span class="fl">1</span>  <span class="co">#change in the mean we want to detect</span></span>
 <span><span class="va">sd_delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span>  <span class="co">#variability in true changes among sites</span></span></code></pre></div>
 </div>
@@ -146,17 +155,16 @@ power. This is equivalent to a paired t-test power calculation, and we
 will do it with both a simulation function and power.t.test to show they
 are equivalent when we calculate the standard deviation of the
 difference correctly.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">site_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_min_sites.html">find_min_sites</a></span><span class="op">(</span>nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                           delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
 <span>                           sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>, sd_d <span class="op">=</span> <span class="va">sd_delta</span>,</span>
 <span>                           target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>                           S_grid <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">40</span>, nsim <span class="op">=</span> <span class="fl">3000</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">site_res</span><span class="op">$</span><span class="va">S_star</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 13</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot power curve for sites</span></span>
+<span><span class="va">site_res</span><span class="op">$</span><span class="va">S_star</span></span>
+<span></span>
+<span><span class="co"># Plot power curve for sites</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">site_res</span><span class="op">$</span><span class="va">curve</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">S</span>, y <span class="op">=</span> <span class="va">power</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -164,7 +172,6 @@ difference correctly.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Power Curve for Number of Sites, known before and after samples"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Number of Sites"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="UserGuide_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
 <p>The power curve shows how power increases with more samples after the
 change. The dashed red line indicates the target power (0.8), and the
 dashed blue line indicates the minimum number of after samples needed to
@@ -178,16 +185,15 @@ means per site is calculated as:
 sd_w^2/nA - Within-site variance for before measurements: sd_w^2/nB -
 Between-site variance in true changes: sd_d^2</p>
 <p>The function getSD_difference makes this calculation.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sd_diff_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSD_difference.html">getSD_difference</a></span><span class="op">(</span>sd_within <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
 <span>                                 nA <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                                 nB <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                                 sd_delta <span class="op">=</span> <span class="va">sd_delta</span><span class="op">)</span></span>
 <span><span class="va">sd_diff_hat</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 1.169289</span></span></code></pre>
 <p>We can then use power.t.test to find the number of sites needed for
 the paired t-test.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">power_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/power.t.test.html" class="external-link">power.t.test</a></span><span class="op">(</span>n <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>                              delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
 <span>                              sd <span class="op">=</span> <span class="va">sd_diff_hat</span>,</span>
@@ -196,10 +202,9 @@ the paired t-test.</p>
 <span>                              type <span class="op">=</span> <span class="st">"paired"</span>,</span>
 <span>                              alternative <span class="op">=</span> <span class="st">"two.sided"</span><span class="op">)</span></span>
 <span><span class="va">power_result</span><span class="op">$</span><span class="va">n</span>  <span class="co">#Number of sites needed</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 12.78393</span></span></code></pre>
 <p>This matches the result from our simulation function find_min_sites.
 Here is the power curve.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  n_sites <span class="op">=</span> <span class="va">site_res</span><span class="op">$</span><span class="va">curve</span><span class="op">$</span><span class="va">S</span>,</span>
 <span>  power_analytical <span class="op">=</span> <span class="fu"><a href="../reference/find_min_sites_analytical.html">find_min_sites_analytical</a></span><span class="op">(</span>S_grid <span class="op">=</span> <span class="va">site_res</span><span class="op">$</span><span class="va">curve</span><span class="op">$</span><span class="va">S</span>,</span>
@@ -210,8 +215,8 @@ Here is the power curve.</p>
 <span></span>
 <span><span class="co"># Plot comparison</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">comparison_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_sites</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">power_analytical</span>, color <span class="op">=</span> <span class="st">"power.t.test"</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">power_simulation</span>, color <span class="op">=</span> <span class="st">"Simulation"</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">power_analytical</span>, color <span class="op">=</span> <span class="st">"power.t.test"</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">power_simulation</span>, color <span class="op">=</span> <span class="st">"Simulation"</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="va">power_result</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, color <span class="op">=</span> <span class="st">"blue"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">site_res</span><span class="op">$</span><span class="va">S_star</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
@@ -225,12 +230,6 @@ Here is the power curve.</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power.t.test"</span> <span class="op">=</span> <span class="st">"blue"</span>, <span class="st">"Simulation"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">## <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
-<span><span class="co">## <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
-<span><span class="co">## <span style="color: #555555;">generated.</span></span></span></code></pre>
-<p><img src="UserGuide_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="question-2-find-minimum-n_after">(Question 2) Find minimum n_after<a class="anchor" aria-label="anchor" href="#question-2-find-minimum-n_after"></a>
@@ -240,25 +239,15 @@ the change, and want to know how many samples after the change are
 needed to achieve target power.The function res_n_after finds the
 minimum number of samples after the change needed to achieve target
 power, given the number of sites and samples before the change.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_n_after</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_n_after.html">find_n_after</a></span><span class="op">(</span>S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>,</span>
 <span>                    delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
 <span>                    sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>, sd_d <span class="op">=</span> <span class="va">sd_delta</span>,</span>
 <span>                    target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>                    n_grid <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, nsim <span class="op">=</span> <span class="fl">3000</span>, seed <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span>
-<span><span class="va">res_n_after</span><span class="op">$</span><span class="va">n_star</span>  <span class="co">#Number of after samples need for specified power</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 6</span></span></code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_n_after</span><span class="op">$</span><span class="va">curve</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   n_after     power</span></span>
-<span><span class="co">## 1       1 0.3646667</span></span>
-<span><span class="co">## 2       2 0.5600000</span></span>
-<span><span class="co">## 3       3 0.6833333</span></span>
-<span><span class="co">## 4       4 0.7100000</span></span>
-<span><span class="co">## 5       5 0.7620000</span></span>
-<span><span class="co">## 6       6 0.8070000</span></span></code></pre>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot power curve for number of samples after</span></span>
+<span><span class="va">res_n_after</span><span class="op">$</span><span class="va">n_star</span>  <span class="co">#Number of after samples need for specified power</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_n_after</span><span class="op">$</span><span class="va">curve</span><span class="op">)</span></span>
+<span><span class="co"># Plot power curve for number of samples after</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">res_n_after</span><span class="op">$</span><span class="va">curve</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_after</span>, y <span class="op">=</span> <span class="va">power</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -266,19 +255,18 @@ power, given the number of sites and samples before the change.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Power Curve for Before-After Design"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Number of After Samples per Site"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="UserGuide_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700">
-The power curve shows how power increases with more samples after the
+<p>The power curve shows how power increases with more samples after the
 change. The dashed red line indicates the target power (0.8), and the
 dashed blue line indicates the minimum number of after samples needed to
 achieve that power.</p>
 <p>Now, we repeat the calculation using the standard power.t.test
 function for comparison. The standard deviation of the difference
 between after and before means per site is calculated as before.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Calculate power for a range of nA values</span></span>
 <span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span><span class="va">power_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_grid</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/power_for_nA.html">power_for_nA</a></span><span class="op">(</span><span class="va">nA</span>, S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>, </span>
+<span>  <span class="fu"><a href="../reference/power_for_nA_analytical.html">power_for_nA_analytical</a></span><span class="op">(</span><span class="va">nA</span>, S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>, </span>
 <span>               delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
 <span>                sd_within <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
 <span>                sd_delta <span class="op">=</span> <span class="va">sd_delta</span>,</span>
@@ -293,9 +281,9 @@ between after and before means per site is calculated as before.</p>
 <span><span class="co"># Plot comparison</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">comparison_nA_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_after</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">power_analytical</span>, color <span class="op">=</span> <span class="st">"power.t.test"</span><span class="op">)</span>,</span>
-<span>            size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            linetype <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">power_simulation</span>, color <span class="op">=</span> <span class="st">"Simulation"</span><span class="op">)</span>,</span>
-<span>            size <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            linetype <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="va">res_n_after</span><span class="op">$</span><span class="va">n_star</span><span class="op">)</span>,</span>
 <span>             linetype <span class="op">=</span> <span class="st">"dotted"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
@@ -310,7 +298,6 @@ between after and before means per site is calculated as before.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power.t.test"</span> <span class="op">=</span> <span class="st">"blue"</span>,</span>
 <span>                                <span class="st">"Simulation"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="UserGuide_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 <p>This matches the result from our simulation function
 find_n_after.</p>
 </div>
@@ -320,7 +307,7 @@ find_n_after.</p>
 <p>Here we calculate the minimum detectable percent change given the
 same simulated data and planning assumptions as above, then visualize
 how it varies with the number of after samples per site.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Minimum detectable percent change for the demo scenario</span></span>
 <span><span class="va">min_detectable_pct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_min_detectable_percent.html">find_min_detectable_percent</a></span><span class="op">(</span></span>
 <span>  S <span class="op">=</span> <span class="va">S_demo</span>,</span>
@@ -334,10 +321,9 @@ how it varies with the number of after samples per site.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">min_detectable_pct</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 103.9095</span></span></code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot detectable percent change over a range of nA values</span></span>
-<span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
+<p>Plot detectable percent change over a range of nA values</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span><span class="va">detectable_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  n_after <span class="op">=</span> <span class="va">nA_grid</span>,</span>
 <span>  min_detectable_percent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_grid</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
@@ -362,10 +348,34 @@ how it varies with the number of after samples per site.</p>
 <span>    x <span class="op">=</span> <span class="st">"Number of After Samples per Site"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Minimum Detectable Percent Change"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="UserGuide_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
+<p>Plot power vs. minimum detectable percent change over a range of nA
+values</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">inputGrid</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>nA <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, percent_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">30</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">inputGrid</span><span class="op">$</span><span class="va">power</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mapply.html" class="external-link">mapply</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">nA</span>, <span class="va">pct</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/power_for_percent_change.html">power_for_percent_change</a></span><span class="op">(</span></span>
+<span>    S <span class="op">=</span> <span class="va">S_demo</span>,</span>
+<span>    nB <span class="op">=</span> <span class="va">nB_demo</span>,</span>
+<span>    nA <span class="op">=</span> <span class="va">nA</span>,</span>
+<span>    sd_within <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
+<span>    sd_delta <span class="op">=</span> <span class="va">sd_delta</span>,</span>
+<span>    baseline_mean <span class="op">=</span> <span class="va">before_mean</span>,</span>
+<span>    logTransform <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    percent_change <span class="op">=</span> <span class="va">pct</span>,</span>
+<span>    alpha <span class="op">=</span> <span class="fl">0.05</span></span>
+<span>  <span class="op">)</span><span class="op">}</span>, <span class="va">inputGrid</span><span class="op">$</span><span class="va">nA</span>, <span class="va">inputGrid</span><span class="op">$</span><span class="va">percent_change</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">inputGrid</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">nA</span>, y <span class="op">=</span> <span class="va">power</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">percent_change</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Power vs. Sample Sizes for Different Percent Changes"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Percent Change"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Power"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"After Samples (nA)"</span></span>
+<span>  <span class="op">)</span> </span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<h3 id="conclusion-on-paired-t-test">Conclusion on paired t-test<a class="anchor" aria-label="anchor" href="#conclusion-on-paired-t-test"></a>
 </h3>
 <p>The simulation-based functions produce results that align closely
 with the analytical solutions from power.t.test when the standard
@@ -374,6 +384,58 @@ simulation approach for power and sample size calculations in
 Before-After designs with fixed sites and repeated samples per site. We
 can now add biological realism by using functions other than normal for
 the simulation, and adding more complex designs.</p>
+</div>
+<div class="section level3">
+<h3 id="question-4-wilcoxon-test-nonparametric-using-the-same-simulated-data">(Question 4) Wilcoxon test (nonparametric) using the same simulated
+data<a class="anchor" aria-label="anchor" href="#question-4-wilcoxon-test-nonparametric-using-the-same-simulated-data"></a>
+</h3>
+<p>Here we repeat the three planning questions using the Wilcoxon
+signed-rank test instead of the paired t-test. These calculations use
+simulation (<code>useTest = "wilcoxon"</code>).</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># (a) Minimum sites with Wilcoxon test</span></span>
+<span><span class="va">site_res_wilcox</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_min_sites.html">find_min_sites</a></span><span class="op">(</span></span>
+<span>  nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
+<span>  sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>, sd_d <span class="op">=</span> <span class="va">sd_delta</span>,</span>
+<span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  S_grid <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">40</span>, nsim <span class="op">=</span> <span class="fl">3000</span>, seed <span class="op">=</span> <span class="fl">42</span>,</span>
+<span>  useTest <span class="op">=</span> <span class="st">"wilcoxon"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">site_res_wilcox</span><span class="op">$</span><span class="va">S_star</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">site_res_wilcox</span><span class="op">$</span><span class="va">curve</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">S</span>, y <span class="op">=</span> <span class="va">power</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">site_res_wilcox</span><span class="op">$</span><span class="va">S_star</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Wilcoxon Power Curve for Number of Sites"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"Number of Sites"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Power"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># (b) Minimum n_after with Wilcoxon test</span></span>
+<span><span class="va">res_n_after_wilcox</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_n_after.html">find_n_after</a></span><span class="op">(</span></span>
+<span>  S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>,</span>
+<span>  delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
+<span>  sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>, sd_d <span class="op">=</span> <span class="va">sd_delta</span>,</span>
+<span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  n_grid <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, nsim <span class="op">=</span> <span class="fl">3000</span>, seed <span class="op">=</span> <span class="fl">99</span>,</span>
+<span>  useTest <span class="op">=</span> <span class="st">"wilcoxon"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res_n_after_wilcox</span><span class="op">$</span><span class="va">n_star</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">res_n_after_wilcox</span><span class="op">$</span><span class="va">curve</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_after</span>, y <span class="op">=</span> <span class="va">power</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">res_n_after_wilcox</span><span class="op">$</span><span class="va">n_star</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Wilcoxon Power Curve for After Samples"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"Number of After Samples per Site"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Power"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
