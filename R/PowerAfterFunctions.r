@@ -401,23 +401,6 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
 
 
 
-#' find_min_detectable_percent
-#'
-#' Calculates the smallest percentage change detectable for a given sample size.
-#'
-#' @param S Number of sites
-#' @param nB Number of before measurements per site
-#' @param nA Number of after measurements per site
-#' @param sd_within Within-site standard deviation (log calculated if logTransform=TRUE)
-#' @param sd_delta Between-site SD of true changes (default 0)
-#' @param logTransform Logical indicating whether to calculate the detectable change on the log scale (default TRUE)
-#' @param logAdd Value to add to response variable before log-transforming to avoid issues
-#' @param target_power Desired power (default 0.8)
-#' @param alpha Significance level (default 0.05)
-#'
-#' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
-#' @export
-
 find_min_detectable_percent <- function(S,
                                         nB,
                                         nA,
@@ -426,38 +409,73 @@ find_min_detectable_percent <- function(S,
                                         logTransform = FALSE,
                                         logAdd=0,
                                         target_power = 0.8,
-                                        alpha = 0.05) {
+                                        alpha = 0.05,
+                                        distribution = c("normal", "nbinom", "binomial"),
+                                        useTest = c("paired-t", "wilcoxon", "prop.test"),
+                                        nbinom_mu = NULL, nbinom_disp = NULL,
+                                        binomial_size = NULL, binomial_prob = NULL,
+                                        nsim = 2000, seed = 1,
+                                        delta_bounds = c(1e-4, 5)) {
 
-  # 1. Define the root-finding function for the log-delta
-  power_root_func <- function(delta) {
-    # Calculate SD of the difference using your provided logic
-    sd_diff <- getSD_difference(sd_within, nA, nB, sd_delta)
+  distribution <- match.arg(distribution)
+  useTest <- match.arg(useTest)
 
-    # Analytical power for the log-difference
-    current_power <- power.t.test(
-      n = S,
-      delta = delta,
-      sd = sd_diff,
-      sig.level = alpha,
-      type = "one.sample",
-      alternative = "two.sided"
-    )$power
-
-    return(current_power - target_power)
+  if (useTest == "prop.test" && distribution != "binomial") {
+    stop("useTest = 'prop.test' is only supported for distribution = 'binomial'.")
   }
 
-  # 2. Find the required log_delta (searching between 0.001 and 5)
-  fit <- uniroot(power_root_func, interval = c(1e-4, 5)) #solve equation
-  log_delta_required <- fit$root
+  if (distribution == "nbinom" && (is.null(nbinom_mu) || is.null(nbinom_disp))) {
+    stop("For distribution = 'nbinom', provide nbinom_mu and nbinom_disp.")
+  }
 
-  # 3. Convert log-scale change back to a percentage
-  # exp(log_delta) gives the ratio (e.g., 1.3).
-  # (ratio - 1) * 100 gives the percent (e.g., 30)
-  if(logTransform) percent_change <- (exp(log_delta_required) - logAdd ) * 100 else
-    percent_change <- log_delta_required * 100
+  if (distribution == "binomial" && (is.null(binomial_size) || is.null(binomial_prob))) {
+    stop("For distribution = 'binomial', provide binomial_size and binomial_prob.")
+  }
+
+  # 1. Define the root-finding function for the delta
+  power_root_func <- function(delta) {
+    current_power <- if (distribution == "normal" && useTest == "paired-t") {
+      sd_diff <- getSD_difference(sd_within, nA, nB, sd_delta)
+      power.t.test(
+        n = S,
+        delta = delta,
+        sd = sd_diff,
+        sig.level = alpha,
+        type = "one.sample",
+        alternative = "two.sided"
+      )$power
+    } else {
+      power_for_n_after(
+        S = S, nB = nB, nA = nA,
+        delta = delta, sd_w = sd_within, sd_d = sd_delta,
+        alpha = alpha, nsim = nsim, seed = seed,
+        distribution = distribution,
+        useTest = useTest,
+        nbinom_mu = nbinom_mu, nbinom_disp = nbinom_disp,
+        binomial_size = binomial_size, binomial_prob = binomial_prob
+      )
+    }
+
+    current_power - target_power
+  }
+
+  # 2. Find the required delta
+  fit <- uniroot(power_root_func, interval = delta_bounds)
+  delta_required <- fit$root
+
+  # 3. Convert to percent change
+  if (distribution == "nbinom") {
+    percent_change <- ((exp(log(nbinom_mu) + delta_required) - nbinom_mu) / nbinom_mu) * 100
+  } else if (distribution == "binomial") {
+    prob_after <- plogis(qlogis(binomial_prob) + delta_required)
+    percent_change <- (prob_after - binomial_prob) * 100
+  } else {
+    if (logTransform) {
+      percent_change <- (exp(delta_required) - logAdd) * 100
+    } else {
+      percent_change <- delta_required * 100
+    }
+  }
 
   return(percent_change)
 }
-
-
-

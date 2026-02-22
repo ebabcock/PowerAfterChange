@@ -229,6 +229,55 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
 
 This matches the result from our simulation function find_n_after. 
 
+### (Question 3) Minimum detectable percent change
+
+Here we calculate the minimum detectable percent change given the same simulated data and planning assumptions as above, then visualize how it varies with the number of after samples per site.
+
+```{r}
+# Minimum detectable percent change for the demo scenario
+min_detectable_pct <- find_min_detectable_percent(
+  S = S_demo,
+  nB = nB_demo,
+  nA = 5,
+  sd_within = sd_within_hat,
+  sd_delta = sd_delta,
+  logTransform = FALSE,
+  target_power = 0.8,
+  alpha = 0.05
+)
+
+min_detectable_pct
+```
+
+```{r}
+# Plot detectable percent change over a range of nA values
+nA_grid <- 1:40
+detectable_df <- data.frame(
+  n_after = nA_grid,
+  min_detectable_percent = sapply(nA_grid, function(nA) {
+    find_min_detectable_percent(
+      S = S_demo,
+      nB = nB_demo,
+      nA = nA,
+      sd_within = sd_within_hat,
+      sd_delta = sd_delta,
+      logTransform = FALSE,
+      target_power = 0.8,
+      alpha = 0.05
+    )
+  })
+)
+
+ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
+  geom_line() +
+  geom_hline(yintercept = min_detectable_pct, linetype = "dashed", color = "red") +
+  labs(
+    title = "Minimum Detectable Percent Change vs. After Samples",
+    x = "Number of After Samples per Site",
+    y = "Minimum Detectable Percent Change"
+  )
+```
+
 ### Conclusion
 
 The simulation-based functions produce results that align closely with the analytical solutions from power.t.test when the standard deviation of the difference is calculated correctly. This validates the simulation approach for power and sample size calculations in Before-After designs with fixed sites and repeated samples per site. We can now add biological realism by using functions other than normal for the simulation, and adding more complex designs.
