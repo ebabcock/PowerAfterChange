@@ -1,13 +1,35 @@
 # power_for_nA Function to calculate power for given number of after samples for a paire t-test of the difference in means before vs. after change using power.t.test
 
-power_for_nA Function to calculate power for given number of after
-samples for a paire t-test of the difference in means before vs. after
-change using power.t.test
+Function to calculate power for given number of after samples for a
+paired t-test of the difference in means before vs. after change using
+power.t.test
 
 ## Usage
 
 ``` r
-power_for_nA(nA, S, nB, delta, sd_within, sd_delta, alpha)
+power_for_nA(
+  nA,
+  S,
+  nB,
+  delta,
+  sd_within,
+  sd_delta,
+  alpha,
+  distribution = c("normal", "nbinom", "binomial"),
+  useTest = c("paired-t", "wilcoxon", "prop.test")
+)
+
+power_for_nA(
+  nA,
+  S,
+  nB,
+  delta,
+  sd_within,
+  sd_delta,
+  alpha,
+  distribution = c("normal", "nbinom", "binomial"),
+  useTest = c("paired-t", "wilcoxon", "prop.test")
+)
 ```
 
 ## Arguments
@@ -40,6 +62,16 @@ power_for_nA(nA, S, nB, delta, sd_within, sd_delta, alpha)
 
   Significance level
 
+- distribution:
+
+  Distribution for simulated data. Must be "normal" here.
+
+- useTest:
+
+  Which test to use. Must be "paired-t" here.
+
 ## Value
+
+Power for the given number of after sample
 
 Power for the given number of after sample

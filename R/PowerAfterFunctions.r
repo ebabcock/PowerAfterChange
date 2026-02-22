@@ -280,8 +280,10 @@ summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
 #' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
 #' @export
 
-find_min_detectable_percent <- function(S, nB, nA,
-                                        sd_within,
+find_min_detectable_percent <- function(S,
+                                        nB,
+                                        nA,
+                                        sd_within=NA,
                                         sd_delta = 0,
                                         logTransform = FALSE,
                                         logAdd=0,

@@ -11,8 +11,9 @@ knitr::opts_chunk$set(eval=TRUE)
 
 ```{r,message=FALSE}
 library(tidyverse)
-library(PowerAfterChange)
-theme_set(theme_bw())
+theme_set(theme_minimal())
+#devtools::install_github("ebabcock/PowerAfterChange")
+library(PowerAfterChange) #Library with all the new functions
 ```
 
 
@@ -20,20 +21,27 @@ theme_set(theme_bw())
 
 ```{r}
 root <- rprojroot::find_package_root_file()
-all_fish <- read_csv(file.path(root, "data", "all_fish.csv")) 
+fish <- read_csv(file.path(root, "data", "Fish_only - Zero_counts_&_Env._data.csv")) 
 head(fish)
-ggplot(fish, aes(x = factor(Site), y = den)) +
-  geom_violin() +
-  facet_wrap(~fSeason) +
+fishTotal<-fish %>%
+  group_by(Site, Season,WYR) %>%
+  summarise(number = sum(num),
+            area_sampled=first(area_sampled)) %>%
+  ungroup() %>%
+  mutate(den=number/area_sampled)
+
+ggplot(fishTotal, aes(x = factor(Site), y = log(den+0.01),color=Season)) +
+  geom_boxplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
+
 
 ### Calculate summary statistics
 
 The summarize_baseline function gives us the sd_within and sd_among sites in the baseline data, as well as the optionally log transformed values. 
 
 ```{r}
-fishSumDry<-summarize_baseline(filter(fish,fSeason=="DRY"),
+fishSumDry<-summarize_baseline(filter(fishTotal,Season=="DRY"),
                             siteVar ="Site",
                             responseVar = "den",
                             logTransform = TRUE,
@@ -43,6 +51,17 @@ fishSumDry
                             
 ```      
 
+Note the warning. The sites are not sampled the same number of times. You can use the average sample size per site, but it adds  uncertainty to the power calculation. Here is the number of samples per site per season. 
+
+```{r}
+fishTotal %>%
+  group_by(Season, Site) %>%
+  summarise(n = n()) %>%
+  group_by(Season) %>%
+  summarise(mean_n = mean(n), min_n = min(n), max_n = max(n))
+
+```
+
 
 ### Planning assumptions
 
@@ -51,16 +70,16 @@ This is the change we want to be able to detect with sufficient power. It can be
 ```{r}
 delta_target_log <- 0.3  #change in the mean we want to detect
 sd_delta_log <- 0  #variability in true changes among sites 
-nA_fixed <- 5  #number of samples after the change per site for fixed number of sites comparison
-
+nA_fixed <- 3  #number of samples after the change per site for fixed number of sites comparison
+nB <- 10  #number of samples before the change per site for fixed number of sites comparison, based on minimum for the dry season.
 ```
 
 ### (Question 1) Find minimum sites given before and after number known sample size
 
-In this scenario, we know how many samples we have before and after the change, and want to know how many sites are needed to achieve target power. This is equivalent to a paired t-test power calculation, and we will do it with both a simulation function and power.t.test.
+In this scenario, we know how many samples we have before and after the change, and want to know how many sites are needed to achieve target power. This is equivalent to a paired t-test power calculation, and we will do it with both a simulation function and power.t.test. The function find_min_sites finds the minimum number of sites needed to achieve target power, given the number of samples before and after the change, using simulation.
 
 ```{r}
-site_res <- find_min_sites(nB = fishSumDry$nB, 
+site_res <- find_min_sites(nB = nB, 
                            nA = nA_fixed,
                            delta = delta_target_log,
                            sd_w = fishSumDry$logsd_within, 
@@ -69,10 +88,14 @@ site_res <- find_min_sites(nB = fishSumDry$nB,
                            S_grid = 2:200, nsim = 1000, seed = 42)
 
 site_res$S_star  #Number of sites needed for specified power
+```
 
+We can get the same result from a t test. 
+
+```{r}
 sd_diff_hat <- getSD_difference(sd_within = fishSumDry$logsd_within,
                                  nA = nA_fixed,
-                                 nB = fishSumDry$nB,
+                                 nB = nB,
                                  sd_delta = sd_delta_log)
 sd_diff_hat
 power_result <- power.t.test(n = NULL,
@@ -83,7 +106,11 @@ power_result <- power.t.test(n = NULL,
                               type = "paired",
                               alternative = "two.sided")
 power_result$n  #Number of sites needed
+```
 
+Plot to show the comparison of power across a range of site numbers for both methods.
+
+```{r}
 comparison_df <- data.frame(
   n_sites = site_res$curve$S,
   power_analytical = find_min_sites_analytical(S_grid = site_res$curve$S,
@@ -119,20 +146,26 @@ In this scenario, we have a fixed number of sites and samples before the change,
 
 ```{r}
 res_n_after <- find_n_after(S = length(unique(fish$Site)), 
-                            nB = fishSumDry$nB,
+                            nB = nB,
                             delta = delta_target_log,
                             sd_w = fishSumDry$logsd_within, 
                             sd_d = sd_delta_log,
                             target_power = 0.8, alpha = 0.05,
-                            n_grid = 1:200, nsim = 1000, seed = 99)
+                            n_grid = 1:100, nsim = 1000, seed = 99)
 res_n_after$n_star  #Number of after samples need for specified power
-# Calculate power for a range of nA values
+```
+
+
+Calculate power for a range of nA values using simulation.
+
+```{r}
 nA_grid <- 1:100
 power_values <- sapply(nA_grid, function(nA) {
-  power_for_nA(nA, S = S_demo, nB = nB_demo, 
-               delta = delta_target,
-                sd_within = sd_within_hat,
-                sd_delta = sd_delta,
+  power_for_nA(nA, S = length(unique(fish$Site)), 
+               nB = nB, 
+               delta = delta_target_log,
+                sd_within = fishSumDry$logsd_within,
+                sd_delta =  sd_delta_log,
                 alpha = 0.05)
 })
 # Create a data frame for plotting
@@ -144,9 +177,9 @@ comparison_nA_df <- data.frame(
 # Plot comparison
 ggplot(comparison_nA_df, aes(x = n_after)) +
   geom_line(aes(y = power_analytical, color = "power.t.test"),
-            size = 1) +
+            linewidth = 1) +
   geom_line(aes(y = power_simulation, color = "Simulation"),
-            size = 1, linetype = "dashed") +
+            linewidth = 1, linetype = "dashed") +
   geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
   geom_vline(xintercept = ceiling(res_n_after$n_star),
              linetype = "dotted", color = "red", alpha = 0.5) +
@@ -164,10 +197,15 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
   
 ```
 
-This matches the result from our simulation function find_n_after. 
+### (Question 3) Find minimum percent change detectable
 
-### Conclusion
-
-The simulation-based functions produce results that align closely with the analytical solutions from power.t.test when the standard deviation of the difference is calculated correctly. This validates the simulation approach for power and sample size calculations in Before-After designs with fixed sites and repeated samples per site. We can now add biological realism by using functions other than normal for the simulation, and adding more complex designs.
-
+```{r}
+percent_change_res <- find_min_percent_change(S = length(unique(fish$Site)), 
+                                               nB = nB,
+                                               nA = nA_fixed,
+                                               sd_w = fishSumDry$logsd_within, 
+                                               sd_d = sd_delta_log,
+                                               target_power = 0.8, alpha = 0.05,
+                                               percent_grid = seq(0, 100, by = 1), nsim = 1000, seed = 123)
+```
 

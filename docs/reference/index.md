@@ -2,6 +2,8 @@
 
 ## All functions
 
+- [`find_min_detectable_percent()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_detectable_percent.md)
+  : find_min_detectable_percent
 - [`find_min_sites()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_sites.md)
   : find_min_sites
 - [`find_min_sites_analytical()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_sites_analytical.md)

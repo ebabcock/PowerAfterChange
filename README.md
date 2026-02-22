@@ -22,5 +22,3 @@ library(PowerAfterChange)
 
 See the user guide vignette at ebabcock.github.io/PowerAfterChange for a
 simulated data example.
-
-Contact ebabcock@miami.edu if you have questions. 

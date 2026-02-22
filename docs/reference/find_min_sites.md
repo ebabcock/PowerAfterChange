@@ -4,6 +4,10 @@ Function to find the minimum number of sites needed to achieve target
 power from a paired t test on the means across observations at sites
 before and after a changepoint.
 
+Function to find the minimum number of sites needed to achieve target
+power from a paired t test on the means across observations at sites
+before and after a changepoint.
+
 ## Usage
 
 ``` r
@@ -17,7 +21,32 @@ find_min_sites(
   alpha = 0.05,
   S_grid = 2:50,
   nsim = 2000,
-  seed = 1
+  seed = 1,
+  distribution = c("normal", "nbinom", "binomial"),
+  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  nbinom_mu = NULL,
+  nbinom_disp = NULL,
+  binomial_size = NULL,
+  binomial_prob = NULL
+)
+
+find_min_sites(
+  nB,
+  nA,
+  delta,
+  sd_w,
+  sd_d = 0,
+  target_power = 0.8,
+  alpha = 0.05,
+  S_grid = 2:50,
+  nsim = 2000,
+  seed = 1,
+  distribution = c("normal", "nbinom", "binomial"),
+  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  nbinom_mu = NULL,
+  nbinom_disp = NULL,
+  binomial_size = NULL,
+  binomial_prob = NULL
 )
 ```
 
@@ -63,7 +92,35 @@ find_min_sites(
 
   Random seed for reproducibility
 
+- distribution:
+
+  Distribution for simulated data. One of "normal", "nbinom", or
+  "binomial".
+
+- useTest:
+
+  Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+
+- nbinom_mu:
+
+  Mean parameter for negative binomial (mu)
+
+- nbinom_disp:
+
+  Dispersion (size) parameter for negative binomial
+
+- binomial_size:
+
+  Size parameter (trials) for binomial
+
+- binomial_prob:
+
+  Probability parameter for binomial
+
 ## Value
+
+A list containing the minimum number of sites needed to achieve the
+target power and a data frame of the power curve
 
 A list containing the minimum number of sites needed to achieve the
 target power and a data frame of the power curve
