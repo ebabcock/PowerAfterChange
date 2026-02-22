@@ -14,7 +14,6 @@ library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
 library(PowerAfterChange)
-source("temp2.r")
 ```
 
 This vignette simulates data and tests the updated functions across supported distributions (`normal`, `nbinom`, `binomial`) and test options (`paired-t`, `wilcoxon`, `prop.test`). The plotting style matches the original `UserGuide.Rmd`.

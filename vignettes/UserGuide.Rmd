@@ -34,7 +34,7 @@ The functions in `PowerAfterChange` are designed to be flexible and can be used 
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
-library(PowerAfterChange) #Library with all the new functions
+library(PowerAfterChange) #Library with functions for analysis
 ```
 
 ### Simulate some data
@@ -147,8 +147,8 @@ comparison_df <- data.frame(
 
 # Plot comparison
 ggplot(comparison_df, aes(x = n_sites)) +
-  geom_line(aes(y = power_analytical, color = "power.t.test"), size = 1) +
-  geom_line(aes(y = power_simulation, color = "Simulation"), size = 1, linetype = "dashed") +
+  geom_line(aes(y = power_analytical, color = "power.t.test"), linewidth = 1) +
+  geom_line(aes(y = power_simulation, color = "Simulation"), linewidth = 1, linetype = "dashed") +
   geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
   geom_vline(xintercept = ceiling(power_result$n), linetype = "dotted", color = "blue", alpha = 0.5) +
   geom_vline(xintercept = site_res$S_star, linetype = "dotted", color = "red", alpha = 0.5) +
@@ -211,9 +211,9 @@ comparison_nA_df <- data.frame(
 # Plot comparison
 ggplot(comparison_nA_df, aes(x = n_after)) +
   geom_line(aes(y = power_analytical, color = "power.t.test"),
-            size = 1) +
+            linetype = 1) +
   geom_line(aes(y = power_simulation, color = "Simulation"),
-            size = 1, linetype = "dashed") +
+            linetype = 1, linetype = "dashed") +
   geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
   geom_vline(xintercept = ceiling(res_n_after$n_star),
              linetype = "dotted", color = "red", alpha = 0.5) +
@@ -252,9 +252,9 @@ min_detectable_pct <- find_min_detectable_percent(
 
 min_detectable_pct
 ```
+Plot detectable percent change over a range of nA values
 
 ```{r}
-# Plot detectable percent change over a range of nA values
 nA_grid <- 1:40
 detectable_df <- data.frame(
   n_after = nA_grid,
@@ -281,6 +281,33 @@ ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
     y = "Minimum Detectable Percent Change"
   )
 ```
+
+Plot power vs. minimum detectable percent change over a range of nA values
+
+```{r}
+inputGrid<-expand.grid(nA = 1:40, percent_change = seq(0,50,5))
+inputGrid$power <- mapply(function(nA, pct) {
+  find_power_for_percent_change(
+    S = S_demo,
+    nB = nB_demo,
+    nA = nA,
+    sd_within = sd_within_hat,
+    sd_delta = sd_delta,
+    logTransform = FALSE,
+    percent_change = pct,
+    alpha = 0.05
+  )}, inputGrid$nA, inputGrid$percent_change)
+ggplot(inputGrid, aes(x = percent_change, y = power, color = factor(nA))) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "black") +
+  labs(
+    title = "Power vs. Percent Change for Different After Sample Sizes",
+    x = "Percent Change",
+    y = "Power",
+    color = "After Samples (nA)"
+  ) +
+```
+
 
 ### Conclusion on paired t-test
 
@@ -336,56 +363,5 @@ ggplot(res_n_after_wilcox$curve, aes(x = n_after, y = power)) +
     title = "Wilcoxon Power Curve for After Samples",
     x = "Number of After Samples per Site",
     y = "Power"
-  )
-```
-
-```{r}
-# (c) Minimum detectable percent change with Wilcoxon test
-min_detectable_pct_wilcox <- find_min_detectable_percent(
-  S = S_demo,
-  nB = nB_demo,
-  nA = 5,
-  sd_within = sd_within_hat,
-  sd_delta = sd_delta,
-  logTransform = FALSE,
-  target_power = 0.8,
-  alpha = 0.05,
-  useTest = "wilcoxon",
-  nsim = 3000,
-  seed = 123
-)
-
-min_detectable_pct_wilcox
-```
-
-```{r}
-# Plot minimum detectable percent change across nA using Wilcoxon
-nA_grid <- 1:40
-detectable_wilcox_df <- data.frame(
-  n_after = nA_grid,
-  min_detectable_percent = sapply(nA_grid, function(nA) {
-    find_min_detectable_percent(
-      S = S_demo,
-      nB = nB_demo,
-      nA = nA,
-      sd_within = sd_within_hat,
-      sd_delta = sd_delta,
-      logTransform = FALSE,
-      target_power = 0.8,
-      alpha = 0.05,
-      useTest = "wilcoxon",
-      nsim = 2000,
-      seed = 123
-    )
-  })
-)
-
-ggplot(detectable_wilcox_df, aes(x = n_after, y = min_detectable_percent)) +
-  geom_line() +
-  geom_hline(yintercept = min_detectable_pct_wilcox, linetype = "dashed", color = "red") +
-  labs(
-    title = "Wilcoxon Minimum Detectable Percent Change vs. After Samples",
-    x = "Number of After Samples per Site",
-    y = "Minimum Detectable Percent Change"
   )
 ```
