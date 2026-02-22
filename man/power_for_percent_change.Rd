@@ -6,7 +6,7 @@
 \usage{
 power_for_percent_change(
   percent_change,
-  baseline_mean,
+  baseline_mean = NULL,
   nA,
   S,
   nB,

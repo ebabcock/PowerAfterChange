@@ -3,30 +3,9 @@
 Estimate power for a paired t-test on the average of a given number of
 measurements at a fixed number of sites before and after a changepoint.
 
-Estimate power for a paired t-test on the average of a given number of
-measurements at a fixed number of sites before and after a changepoint.
-
 ## Usage
 
 ``` r
-power_for_n_after(
-  S,
-  nB,
-  nA,
-  delta,
-  sd_w,
-  sd_d = 0,
-  alpha = 0.05,
-  nsim = 2000,
-  seed = 1,
-  distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
-  nbinom_mu = NULL,
-  nbinom_disp = NULL,
-  binomial_size = NULL,
-  binomial_prob = NULL
-)
-
 power_for_n_after(
   S,
   nB,
@@ -110,7 +89,5 @@ power_for_n_after(
   Probability parameter for binomial
 
 ## Value
-
-Estimated power for the given number of after measurements
 
 Estimated power for the given number of after measurements

@@ -1,26 +1,19 @@
----
-title: "PowerAfterChange: Simulation Tests for New Distributions and Tests"
-author: "Beth Babcock"
-date: "`r Sys.Date()`"
-output: html_document
----
+# PowerAfterChange: Simulation Tests for Alternative Distributions and Tests
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval=TRUE,message=FALSE,warning=FALSE)
-```
-
-```{r}
+``` r
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
 library(PowerAfterChange)
 ```
 
-This vignette simulates data and tests the updated functions across supported distributions (`normal`, `nbinom`, `binomial`) and test options (`paired-t`, `wilcoxon`, `prop.test`). The plotting style matches the original `UserGuide.Rmd`.
+This vignette simulates data and tests the updated functions across
+supported distributions (`normal`, `nbinom`, `binomial`) and test
+options (`paired-t`, `wilcoxon`, `prop.test`).
 
 ## Shared simulation settings
 
-```{r}
+``` r
 set.seed(2026)
 S_demo <- 12
 nB_demo <- 5
@@ -33,7 +26,7 @@ n_grid <- 1:30
 
 ## Normal distribution tests
 
-```{r}
+``` r
 delta_target <- 0.8
 
 res_normal_t <- find_n_after(
@@ -71,9 +64,11 @@ ggplot(normal_plot_df, aes(x = n_after, y = power, color = method)) +
   theme(legend.position = "bottom")
 ```
 
+![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-3-1.png)
+
 ## Negative binomial tests (log-additive change)
 
-```{r}
+``` r
 nbinom_mu <- 12
 nbinom_disp <- 2
 delta_target_nb <- log(1.25)  # additive on log scale
@@ -117,9 +112,11 @@ ggplot(nb_plot_df, aes(x = n_after, y = power, color = method)) +
   theme(legend.position = "bottom")
 ```
 
+![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-4-1.png)
+
 ## Binomial tests (logit-additive change)
 
-```{r}
+``` r
 binomial_size <- 20
 binomial_prob <- 0.35
 delta_target_bin <- qlogis(0.45) - qlogis(binomial_prob)
@@ -175,9 +172,11 @@ ggplot(bin_plot_df, aes(x = n_after, y = power, color = method)) +
   theme(legend.position = "bottom")
 ```
 
+![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-5-1.png)
+
 ## Sanity checks for `power_for_sites`
 
-```{r}
+``` r
 site_res_normal <- find_min_sites(
   nB = nB_demo, nA = 5,
   delta = delta_target, sd_w = sd_w, sd_d = sd_d,
@@ -196,6 +195,10 @@ ggplot(site_res_normal$curve, aes(x = S, y = power)) +
        y = "Power")
 ```
 
+![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-6-1.png)
+
 ## Conclusion
 
-The plots above demonstrate that the updated functions work across all supported distributions and tests, using the same plotting style as the original UserGuide vignette.
+The plots above demonstrate that the updated functions work across all
+supported distributions and tests, using the same plotting style as the
+original UserGuide vignette.

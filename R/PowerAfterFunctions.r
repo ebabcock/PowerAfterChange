@@ -462,8 +462,9 @@ find_min_detectable_percent <- function(S,
 #'
 #' @returns Power for the given percent change
 #' @export
+#'
 power_for_percent_change <- function(percent_change,
-                                     baseline_mean,
+                                     baseline_mean=NULL,
                                      nA,
                                      S,
                                      nB,

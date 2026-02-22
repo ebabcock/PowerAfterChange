@@ -38,12 +38,12 @@ simulated data example.
   : getSD_difference
 - [`getSD_within()`](https://ebabcock.github.io/PowerAfterChange/reference/getSD_within.md)
   : getSD_within
-- [`power_for_nA()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_nA.md)
-  : power_for_nA Function to calculate power for given number of after
-  samples for a paire t-test of the difference in means before vs. after
-  change using power.t.test
+- [`power_for_nA_analytical()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_nA_analytical.md)
+  : power_for_nA
 - [`power_for_n_after()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_n_after.md)
   : power_for_n_after
+- [`power_for_percent_change()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_percent_change.md)
+  : power_for_percent_change
 - [`power_for_sites()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_sites.md)
   : power_for_sites
 - [`summarize_baseline()`](https://ebabcock.github.io/PowerAfterChange/reference/summarize_baseline.md)
@@ -53,5 +53,7 @@ simulated data example.
 
 ### All vignettes
 
+- [PowerAfterChange: Simulation Tests for Alternative Distributions and
+  Tests](https://ebabcock.github.io/PowerAfterChange/articles/NonNormalDistributionsAndTests.md):
 - [User guide for power after
   change](https://ebabcock.github.io/PowerAfterChange/articles/UserGuide.md):

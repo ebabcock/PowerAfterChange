@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval=TRUE)
+knitr::opts_chunk$set(eval=FALSE)
 ```
 
 
@@ -285,27 +285,29 @@ ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
 Plot power vs. minimum detectable percent change over a range of nA values
 
 ```{r}
-inputGrid<-expand.grid(nA = 1:40, percent_change = seq(0,50,5))
+inputGrid<-expand.grid(nA = 1:40, percent_change = seq(5,30,5))
 inputGrid$power <- mapply(function(nA, pct) {
-  find_power_for_percent_change(
+  power_for_percent_change(
     S = S_demo,
     nB = nB_demo,
     nA = nA,
     sd_within = sd_within_hat,
     sd_delta = sd_delta,
+    baseline_mean = before_mean,
     logTransform = FALSE,
     percent_change = pct,
     alpha = 0.05
   )}, inputGrid$nA, inputGrid$percent_change)
-ggplot(inputGrid, aes(x = percent_change, y = power, color = factor(nA))) +
+ggplot(inputGrid, aes(x = nA, y = power, color = factor(percent_change))) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "black") +
   labs(
-    title = "Power vs. Percent Change for Different After Sample Sizes",
-    x = "Percent Change",
+    title = "Power vs. Sample Sizes for Different Percent Changes",
+    color = "Percent Change",
     y = "Power",
-    color = "After Samples (nA)"
-  ) +
+    x = "After Samples (nA)"
+  ) 
+
 ```
 
 

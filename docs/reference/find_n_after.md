@@ -3,31 +3,9 @@
 Function to find the minimum number of after measurements needed to
 achieve target power, for a paired t-test on the before and after means.
 
-Function to find the minimum number of after measurements needed to
-achieve target power, for a paired t-test on the before and after means.
-
 ## Usage
 
 ``` r
-find_n_after(
-  S,
-  nB,
-  delta,
-  sd_w,
-  sd_d = 0,
-  target_power = 0.8,
-  alpha = 0.05,
-  n_grid = 1:50,
-  nsim = 2000,
-  seed = 1,
-  distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
-  nbinom_mu = NULL,
-  nbinom_disp = NULL,
-  binomial_size = NULL,
-  binomial_prob = NULL
-)
-
 find_n_after(
   S,
   nB,
@@ -116,9 +94,6 @@ find_n_after(
   Probability parameter for binomial
 
 ## Value
-
-A list containing the minimum number of after measurements needed to
-achieve the target power and a data frame of the power curve
 
 A list containing the minimum number of after measurements needed to
 achieve the target power and a data frame of the power curve

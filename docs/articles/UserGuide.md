@@ -18,11 +18,16 @@ to ask are:
     long we would have to wait after a change (e.g. a restoration
     action) to see the change with, for example, annual samples.
 
+3.  Given a fixed number of sites, samples before and after, and an
+    assumed variance, what is the minimum detectable percent change?
+    This addresses how big of a change we would be able to detect with a
+    given sampling design.
+
 Functions are based on Monte Carlo simulation of normal data and using
 the power.t.test function, to show that they are equivalent.
 
 The functions were generated with the help of ChatGPT and GitHub Copilot
-(various AI tools) 1/30/2026-2/5/2026.
+(various AI tools) 1/30/2026-2/21/2026.
 
 The following is a simulated data demo. The simulated data is data
 before the change, and we use this data to get an estimate of the
@@ -30,11 +35,17 @@ within-site standard deviation needed for planning. The data are
 simulated with site-to-site variability and within-site variability,
 using a normal distribution.
 
+The functions in `PowerAfterChange` are designed to be flexible and can
+be used with negative binomial and binomial distributions, and normal
+wiht and without log-transformation, but here we show the normal case
+with no log transformation for simplicity and to compare with
+power.t.test.
+
 ``` r
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
-library(PowerAfterChange) #Library with all the new functions
+library(PowerAfterChange) #Library with functions for analysis
 ```
 
 ### Simulate some data
@@ -67,8 +78,6 @@ sd_within_hat <-getSD_within(baseline = baseline_demo,
 sd_within_hat
 ```
 
-    ## [1] 1.671255
-
 ### Planning assumptions
 
 This is the change we want to be able to detect with sufficient power.
@@ -95,11 +104,7 @@ site_res <- find_min_sites(nB = nB_demo, nA = 5,
                            S_grid = 2:40, nsim = 3000, seed = 42)
 
 site_res$S_star
-```
 
-    ## [1] 13
-
-``` r
 # Plot power curve for sites
 ggplot(site_res$curve, aes(x = S, y = power)) +
   geom_line() +
@@ -109,8 +114,6 @@ ggplot(site_res$curve, aes(x = S, y = power)) +
        x = "Number of Sites",
        y = "Power")
 ```
-
-![](UserGuide_files/figure-html/unnamed-chunk-5-1.png)
 
 The power curve shows how power increases with more samples after the
 change. The dashed red line indicates the target power (0.8), and the
@@ -140,8 +143,6 @@ sd_diff_hat <- getSD_difference(sd_within = sd_within_hat,
 sd_diff_hat
 ```
 
-    ## [1] 1.169289
-
 We can then use power.t.test to find the number of sites needed for the
 paired t-test.
 
@@ -155,8 +156,6 @@ power_result <- power.t.test(n = NULL,
                               alternative = "two.sided")
 power_result$n  #Number of sites needed
 ```
-
-    ## [1] 12.78393
 
 This matches the result from our simulation function find_min_sites.
 Here is the power curve.
@@ -172,8 +171,8 @@ comparison_df <- data.frame(
 
 # Plot comparison
 ggplot(comparison_df, aes(x = n_sites)) +
-  geom_line(aes(y = power_analytical, color = "power.t.test"), size = 1) +
-  geom_line(aes(y = power_simulation, color = "Simulation"), size = 1, linetype = "dashed") +
+  geom_line(aes(y = power_analytical, color = "power.t.test"), linewidth = 1) +
+  geom_line(aes(y = power_simulation, color = "Simulation"), linewidth = 1, linetype = "dashed") +
   geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
   geom_vline(xintercept = ceiling(power_result$n), linetype = "dotted", color = "blue", alpha = 0.5) +
   geom_vline(xintercept = site_res$S_star, linetype = "dotted", color = "red", alpha = 0.5) +
@@ -188,14 +187,6 @@ ggplot(comparison_df, aes(x = n_sites)) +
   scale_color_manual(values = c("power.t.test" = "blue", "Simulation" = "red")) +
   theme(legend.position = "bottom")
 ```
-
-    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-    ## ℹ Please use `linewidth` instead.
-    ## This warning is displayed once per session.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-![](UserGuide_files/figure-html/unnamed-chunk-8-1.png)
 
 ### (Question 2) Find minimum n_after
 
@@ -212,23 +203,7 @@ res_n_after <- find_n_after(S = S_demo, nB = nB_demo,
                     target_power = 0.8, alpha = 0.05,
                     n_grid = 1:40, nsim = 3000, seed = 99)
 res_n_after$n_star  #Number of after samples need for specified power
-```
-
-    ## [1] 6
-
-``` r
 head(res_n_after$curve)
-```
-
-    ##   n_after     power
-    ## 1       1 0.3646667
-    ## 2       2 0.5600000
-    ## 3       3 0.6833333
-    ## 4       4 0.7100000
-    ## 5       5 0.7620000
-    ## 6       6 0.8070000
-
-``` r
 # Plot power curve for number of samples after
 ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
   geom_line() +
@@ -239,11 +214,10 @@ ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
        y = "Power") 
 ```
 
-![](UserGuide_files/figure-html/unnamed-chunk-9-1.png) The power curve
-shows how power increases with more samples after the change. The dashed
-red line indicates the target power (0.8), and the dashed blue line
-indicates the minimum number of after samples needed to achieve that
-power.
+The power curve shows how power increases with more samples after the
+change. The dashed red line indicates the target power (0.8), and the
+dashed blue line indicates the minimum number of after samples needed to
+achieve that power.
 
 Now, we repeat the calculation using the standard power.t.test function
 for comparison. The standard deviation of the difference between after
@@ -253,7 +227,7 @@ and before means per site is calculated as before.
 # Calculate power for a range of nA values
 nA_grid <- 1:40
 power_values <- sapply(nA_grid, function(nA) {
-  power_for_nA(nA, S = S_demo, nB = nB_demo, 
+  power_for_nA_analytical(nA, S = S_demo, nB = nB_demo, 
                delta = delta_target,
                 sd_within = sd_within_hat,
                 sd_delta = sd_delta,
@@ -268,9 +242,9 @@ comparison_nA_df <- data.frame(
 # Plot comparison
 ggplot(comparison_nA_df, aes(x = n_after)) +
   geom_line(aes(y = power_analytical, color = "power.t.test"),
-            size = 1) +
+            linetype = 1) +
   geom_line(aes(y = power_simulation, color = "Simulation"),
-            size = 1, linetype = "dashed") +
+            linetype = 1, linetype = "dashed") +
   geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
   geom_vline(xintercept = ceiling(res_n_after$n_star),
              linetype = "dotted", color = "red", alpha = 0.5) +
@@ -287,11 +261,89 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
   theme(legend.position = "bottom")
 ```
 
-![](UserGuide_files/figure-html/unnamed-chunk-10-1.png)
-
 This matches the result from our simulation function find_n_after.
 
-### Conclusion
+### (Question 3) Minimum detectable percent change
+
+Here we calculate the minimum detectable percent change given the same
+simulated data and planning assumptions as above, then visualize how it
+varies with the number of after samples per site.
+
+``` r
+# Minimum detectable percent change for the demo scenario
+min_detectable_pct <- find_min_detectable_percent(
+  S = S_demo,
+  nB = nB_demo,
+  nA = 5,
+  sd_within = sd_within_hat,
+  sd_delta = sd_delta,
+  logTransform = FALSE,
+  target_power = 0.8,
+  alpha = 0.05
+)
+
+min_detectable_pct
+```
+
+Plot detectable percent change over a range of nA values
+
+``` r
+nA_grid <- 1:40
+detectable_df <- data.frame(
+  n_after = nA_grid,
+  min_detectable_percent = sapply(nA_grid, function(nA) {
+    find_min_detectable_percent(
+      S = S_demo,
+      nB = nB_demo,
+      nA = nA,
+      sd_within = sd_within_hat,
+      sd_delta = sd_delta,
+      logTransform = FALSE,
+      target_power = 0.8,
+      alpha = 0.05
+    )
+  })
+)
+
+ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
+  geom_line() +
+  geom_hline(yintercept = min_detectable_pct, linetype = "dashed", color = "red") +
+  labs(
+    title = "Minimum Detectable Percent Change vs. After Samples",
+    x = "Number of After Samples per Site",
+    y = "Minimum Detectable Percent Change"
+  )
+```
+
+Plot power vs. minimum detectable percent change over a range of nA
+values
+
+``` r
+inputGrid<-expand.grid(nA = 1:40, percent_change = seq(5,30,5))
+inputGrid$power <- mapply(function(nA, pct) {
+  power_for_percent_change(
+    S = S_demo,
+    nB = nB_demo,
+    nA = nA,
+    sd_within = sd_within_hat,
+    sd_delta = sd_delta,
+    baseline_mean = before_mean,
+    logTransform = FALSE,
+    percent_change = pct,
+    alpha = 0.05
+  )}, inputGrid$nA, inputGrid$percent_change)
+ggplot(inputGrid, aes(x = nA, y = power, color = factor(percent_change))) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "black") +
+  labs(
+    title = "Power vs. Sample Sizes for Different Percent Changes",
+    color = "Percent Change",
+    y = "Power",
+    x = "After Samples (nA)"
+  ) 
+```
+
+### Conclusion on paired t-test
 
 The simulation-based functions produce results that align closely with
 the analytical solutions from power.t.test when the standard deviation
@@ -300,3 +352,57 @@ approach for power and sample size calculations in Before-After designs
 with fixed sites and repeated samples per site. We can now add
 biological realism by using functions other than normal for the
 simulation, and adding more complex designs.
+
+### (Question 4) Wilcoxon test (nonparametric) using the same simulated data
+
+Here we repeat the three planning questions using the Wilcoxon
+signed-rank test instead of the paired t-test. These calculations use
+simulation (`useTest = "wilcoxon"`).
+
+``` r
+# (a) Minimum sites with Wilcoxon test
+site_res_wilcox <- find_min_sites(
+  nB = nB_demo, nA = 5,
+  delta = delta_target,
+  sd_w = sd_within_hat, sd_d = sd_delta,
+  target_power = 0.8, alpha = 0.05,
+  S_grid = 2:40, nsim = 3000, seed = 42,
+  useTest = "wilcoxon"
+)
+
+site_res_wilcox$S_star
+
+ggplot(site_res_wilcox$curve, aes(x = S, y = power)) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = site_res_wilcox$S_star, linetype = "dashed", color = "blue") +
+  labs(
+    title = "Wilcoxon Power Curve for Number of Sites",
+    x = "Number of Sites",
+    y = "Power"
+  )
+```
+
+``` r
+# (b) Minimum n_after with Wilcoxon test
+res_n_after_wilcox <- find_n_after(
+  S = S_demo, nB = nB_demo,
+  delta = delta_target,
+  sd_w = sd_within_hat, sd_d = sd_delta,
+  target_power = 0.8, alpha = 0.05,
+  n_grid = 1:40, nsim = 3000, seed = 99,
+  useTest = "wilcoxon"
+)
+
+res_n_after_wilcox$n_star
+
+ggplot(res_n_after_wilcox$curve, aes(x = n_after, y = power)) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = res_n_after_wilcox$n_star, linetype = "dashed", color = "blue") +
+  labs(
+    title = "Wilcoxon Power Curve for After Samples",
+    x = "Number of After Samples per Site",
+    y = "Power"
+  )
+```

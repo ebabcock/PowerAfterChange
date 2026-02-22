@@ -18,7 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/UserGuide.html">User guide for power after change</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/NonNormalDistributionsAndTests.html">PowerAfterChange: Simulation Tests for Alternative Distributions and Tests</a></li>
+    <li><a class="dropdown-item" href="../articles/UserGuide.html">User guide for power after change</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -45,12 +46,11 @@
 <span>  <span class="va">S</span>,</span>
 <span>  <span class="va">nB</span>,</span>
 <span>  <span class="va">nA</span>,</span>
-<span>  <span class="va">sd_within</span>,</span>
+<span>  sd_within <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  sd_delta <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  <span class="va">sd_within_log</span>,</span>
-<span>  sd_delta_log <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  logTransform <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  logAdd <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  baseline_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -81,11 +81,16 @@
 
 
 <dt id="arg-logtransform">logTransform<a class="anchor" aria-label="anchor" href="#arg-logtransform"></a></dt>
-<dd><p>Logical indicating whether to calculate the detectable change on the log scale (default TRUE)</p></dd>
+<dd><p>Logical indicating whether to calculate the detectable change on the log scale (default FALSE)</p></dd>
 
 
 <dt id="arg-logadd">logAdd<a class="anchor" aria-label="anchor" href="#arg-logadd"></a></dt>
 <dd><p>Value to add to response variable before log-transforming to avoid issues</p></dd>
+
+
+<dt id="arg-baseline-mean">baseline_mean<a class="anchor" aria-label="anchor" href="#arg-baseline-mean"></a></dt>
+<dd><p>Mean of the original response variable before the change.
+Required when logTransform=TRUE to convert percent change back to original scale.</p></dd>
 
 
 <dt id="arg-target-power">target_power<a class="anchor" aria-label="anchor" href="#arg-target-power"></a></dt>
