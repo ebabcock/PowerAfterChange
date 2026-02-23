@@ -285,7 +285,7 @@ ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
 
 ### Example scenarios to test
 
-```{r}
+```{r,eval=TRUE}
 TestSetup<-expand.grid(Variable=c("logDensity","Density","Number","Presence"),
                        PercentChange=c(10,20,30,40),
                        n_after=c(3,5,10),
@@ -300,7 +300,18 @@ TestSetup<-expand.grid(Variable=c("logDensity","Density","Number","Presence"),
                                 Variable=="Density"~"t.test",
                                 Variable=="Number"~"t.test",
                                 Variable=="Presence"~"prop.test"),
-         sd_within=)
+         sd_within=case_when(Variable=="logDensity"~fishSum$logsd_within[fishSum$Season==Season],
+                                Variable=="Density"~fishSum$sd_within[fishSum$Season==Season],
+                                Variable=="Number"~fishSum$sd_within[fishSum$Season==Season],
+                                Variable=="Presence"~NA_real_),
+         baseline_mean=case_when(Variable=="logDensity"~mean(fishTotal$logDensity[fishTotal$Season==Season]),
+                                Variable=="Density"~mean(fishTotal$Density[fishTotal$Season==Season]),
+                                Variable=="Number"~mean(fishTotal$Number[fishTotal$Season==Season]),
+                                Variable=="Presence"~mean(fishTotal$Presence[fishTotal$Season==Season])),
+         delta=case_when(Variable=="logDensity"~log(1+PercentChange/100),
+                                Variable=="Density"~log(1+PercentChange/100),
+                                Variable=="Number"~log(1+PercentChange/100,
+                                Variable=="Presence"~PercentChange/100),))
 View(TestSetup)
 ```
 

@@ -20,12 +20,16 @@ summarize_baseline(
 
 \item{responseVar}{Name of the response variable in baseline data}
 
+\item{groupVar}{Optional character vector of grouping variables to summarize by}
+
 \item{logTransform}{Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale}
 
 \item{logAdd}{Value to add to response variable before log-transforming to avoid issues with zeros (default 0)}
 }
 \value{
-A data frame containing the estimated within-site and between-site standard deviations, and the number of sites and before samples per site
+A data frame containing the estimated within-site and between-site standard deviations,
+the number of sites and before samples per site, and mean proportion positive by site,
+summarized by group when groupVar is provided.
 }
 \description{
 Summarize baseline data to estimate within-site and between-site standard deviations, and

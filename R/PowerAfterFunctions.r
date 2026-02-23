@@ -347,36 +347,47 @@ power_for_nA_analytical <- function(nA, S, nB, delta, sd_within, sd_delta, alpha
 #' @param baseline Data frame containing baseline measurements
 #' @param siteVar Name of the site variable in baseline data
 #' @param responseVar Name of the response variable in baseline data
+#' @param groupVar Optional character vector of grouping variables to summarize by
 #' @param logTransform Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale
 #' @param logAdd Value to add to response variable before log-transforming to avoid issues with zeros (default 0)
 #'
-#' @returns A data frame containing the estimated within-site and between-site standard deviations, and the number of sites and before samples per site
+#' @returns A data frame containing the estimated within-site and between-site standard deviations,
+#'   the number of sites and before samples per site, and mean proportion positive by site,
+#'   summarized by group when groupVar is provided.
 #' @export
 #'
-summarize_baseline <- function(baseline,siteVar="site",
-                               responseVar="y",
-                               groupVar=NULL,
-                               logTransform=FALSE,
-                               logAdd=0
-                               ){
-  returnVal<-baseline %>%
-    group_by(!!sym(siteVar)) %>%
+summarize_baseline <- function(baseline,
+                               siteVar = "site",
+                               responseVar = "y",
+                               groupVar = NULL,
+                               logTransform = FALSE,
+                               logAdd = 0) {
+  group_syms <- if (is.null(groupVar)) character(0) else groupVar
+
+  returnVal <- baseline %>%
+    group_by(across(all_of(c(group_syms, siteVar)))) %>%
     summarize(
       site_mean = mean(!!sym(responseVar)),
       site_sd = sd(!!sym(responseVar)),
-      site_logmean = if_else(logTransform, mean(log(!!sym(responseVar)+logAdd)), NA_real_),
-      site_logsd = if_else(logTransform, sd(log(!!sym(responseVar)+logAdd)), NA_real_),
-      n = n()
+      site_logmean = if_else(logTransform, mean(log(!!sym(responseVar) + logAdd)), NA_real_),
+      site_logsd = if_else(logTransform, sd(log(!!sym(responseVar) + logAdd)), NA_real_),
+      prop_positive_site = mean(!!sym(responseVar) > 0),
+      n = n(),
+      .groups = "drop"
     ) %>%
-    ungroup() %>%
-    summarize(sd_within = mean(site_sd),
-              sd_between = sd(site_mean),
-              logsd_within = if_else(logTransform, mean(site_logsd), NA_real_),
-              logsd_between = if_else(logTransform, sd(site_logmean), NA_real_),
-              n_sites = n(),
-              nB=if_else(length(unique(n))==1,unique(n)[1],NA)
+    group_by(across(all_of(group_syms))) %>%
+    summarize(
+      sd_within = mean(site_sd),
+      sd_between = sd(site_mean),
+      logsd_within = if_else(logTransform, mean(site_logsd), NA_real_),
+      logsd_between = if_else(logTransform, sd(site_logmean), NA_real_),
+      prop_positive = mean(prop_positive_site),
+      n_sites = n(),
+      nB = if_else(length(unique(n)) == 1, unique(n)[1], NA_real_),
+      .groups = "drop"
     )
-  if(any(is.na(returnVal$nB))){
+
+  if (any(is.na(returnVal$nB))) {
     warning("Number of before samples per site is not consistent across sites. nB is set to NA.")
   }
   return(returnVal)
