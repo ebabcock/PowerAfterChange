@@ -8,6 +8,7 @@ summarize_baseline(
   baseline,
   siteVar = "site",
   responseVar = "y",
+  groupVar = NULL,
   logTransform = FALSE,
   logAdd = 0
 )

@@ -13,7 +13,7 @@ knitr::opts_chunk$set(eval=TRUE)
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
-library(PowerAfterChange) #Library with all the new functions
+library(PowerAfterChange) #Library with functions for power calculations after change
 ```
 
 
@@ -25,28 +25,34 @@ fish <- read_csv(file.path(root, "data", "Fish_only - Zero_counts_&_Env._data.cs
 head(fish)
 fishTotal<-fish %>%
   group_by(Site, Season,WYR) %>%
-  summarise(number = sum(num),
+  summarise( Number = sum(num),
             area_sampled=first(area_sampled)) %>%
   ungroup() %>%
-  mutate(den=number/area_sampled)
+  mutate(Density=Number/area_sampled,
+         Presence=if_else(Number>0,1,0),
+         logDensity=log(Density+0.00001))
 
-ggplot(fishTotal, aes(x = factor(Site), y = log(den+0.01),color=Season)) +
+ggplot(fishTotal, aes(x = factor(Site), y = logDensity,color=Season)) +
   geom_boxplot() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  labs(x = "Site", y = "Log Density (number/area)",
+       title = "Fish Density by Site and Season") +
+  scale_color_manual(values = c("DRY" = "blue", "WET" = "green")) +
+  theme(legend.position = "bottom")
 ```
-
 
 ### Calculate summary statistics
 
-The summarize_baseline function gives us the sd_within and sd_among sites in the baseline data, as well as the optionally log transformed values. 
+The summarize_baseline function gives us the sd_within and sd_among sites in the baseline data, as well as the optionally log transformed values and proportion positive. 
 
 ```{r}
-fishSumDry<-summarize_baseline(filter(fishTotal,Season=="DRY"),
+fishSum<-summarize_baseline(fishTotal,
                             siteVar ="Site",
-                            responseVar = "den",
+                            responseVar = "Density",
+                            groupVar = c("Season"),
                             logTransform = TRUE,
                             logAdd = 0.00001)
-fishSumDry
+fishSum
 
                             
 ```      
@@ -65,13 +71,18 @@ fishTotal %>%
 
 ### Planning assumptions
 
-This is the change we want to be able to detect with sufficient power. It can be on the log scale or the original scale depending on how we do the power calculation. Here we will do it on the log scale
+This is the change we want to be able to detect with sufficient power. It can be on the log scale or the original scale depending on how we do the power calculation. Here we will do it on the log scale.
 
 ```{r}
 delta_target_log <- 0.3  #change in the mean we want to detect
 sd_delta_log <- 0  #variability in true changes among sites 
 nA_fixed <- 3  #number of samples after the change per site for fixed number of sites comparison
 nB <- 10  #number of samples before the change per site for fixed number of sites comparison, based on minimum for the dry season.
+#Example setup for dry seasons
+logsd_within <- fishSum %>%
+  filter(Season == "DRY") %>%
+  pull(logsd_within)
+site_number<-16
 ```
 
 ### (Question 1) Find minimum sites given before and after number known sample size
@@ -82,7 +93,7 @@ In this scenario, we know how many samples we have before and after the change, 
 site_res <- find_min_sites(nB = nB, 
                            nA = nA_fixed,
                            delta = delta_target_log,
-                           sd_w = fishSumDry$logsd_within, 
+                           sd_w = logsd_within, 
                            sd_d = sd_delta_log,
                            target_power = 0.8, alpha = 0.05,
                            S_grid = 2:200, nsim = 1000, seed = 42)
@@ -93,7 +104,7 @@ site_res$S_star  #Number of sites needed for specified power
 We can get the same result from a t test. 
 
 ```{r}
-sd_diff_hat <- getSD_difference(sd_within = fishSumDry$logsd_within,
+sd_diff_hat <- getSD_difference(sd_within = logsd_within,
                                  nA = nA_fixed,
                                  nB = nB,
                                  sd_delta = sd_delta_log)
@@ -145,10 +156,10 @@ ggplot(comparison_df, aes(x = n_sites)) +
 In this scenario, we have a fixed number of sites and samples before the change, and want to know how many samples after the change are needed to achieve target power.The function res_n_after finds the minimum number of samples after the change needed to achieve target power, given the number of sites and samples before the change. 
 
 ```{r}
-res_n_after <- find_n_after(S = length(unique(fish$Site)), 
+res_n_after <- find_n_after(S = site_number, 
                             nB = nB,
                             delta = delta_target_log,
-                            sd_w = fishSumDry$logsd_within, 
+                            sd_w = logsd_within, 
                             sd_d = sd_delta_log,
                             target_power = 0.8, alpha = 0.05,
                             n_grid = 1:100, nsim = 1000, seed = 99)
@@ -161,10 +172,10 @@ Calculate power for a range of nA values using simulation.
 ```{r}
 nA_grid <- 1:100
 power_values <- sapply(nA_grid, function(nA) {
-  power_for_nA(nA, S = length(unique(fish$Site)), 
+  power_for_nA(nA, S = site_number, 
                nB = nB, 
                delta = delta_target_log,
-                sd_within = fishSumDry$logsd_within,
+                sd_within = logsd_within,
                 sd_delta =  sd_delta_log,
                 alpha = 0.05)
 })
@@ -200,12 +211,97 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
 ### (Question 3) Find minimum percent change detectable
 
 ```{r}
-percent_change_res <- find_min_percent_change(S = length(unique(fish$Site)), 
+baseline_mean <- mean(fishTotal$Density[fishTotal$Season=="DRY"])  
+  
+percent_change_res <- find_min_detectable_percent(S = site_number, 
                                                nB = nB,
                                                nA = nA_fixed,
-                                               sd_w = fishSumDry$logsd_within, 
-                                               sd_d = sd_delta_log,
-                                               target_power = 0.8, alpha = 0.05,
-                                               percent_grid = seq(0, 100, by = 1), nsim = 1000, seed = 123)
+                                               sd_within = logsd_within, 
+                                               sd_delta = sd_delta_log,
+                                                logTransform = TRUE,
+                                               logAdd = 0.00001,
+                                               baseline_mean= baseline_mean,
+                                               target_power = 0.8, alpha = 0.05
+                                               )
+percent_change_res  #Minimum percent change detectable for specified power 
+
+#Map for some values of nA
+inputGrid<-expand.grid(nA = 2:10, percent_change = seq(5,30,5))
+inputGrid$power <- mapply(function(nA, pct) {
+  power_for_percent_change(
+    S = site_number,
+    nB = nB,
+    nA = nA_fixed,
+    sd_within = logsd_within,
+    sd_delta = 0,
+    baseline_mean = baseline_mean,
+    logTransform = TRUE,
+    percent_change = pct,
+    alpha = 0.05
+  )}, inputGrid$nA, inputGrid$percent_change)
+ggplot(inputGrid, aes(x = nA, y = power, color = factor(percent_change))) +
+  geom_line() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "black") +
+  labs(
+    title = "Power vs. Sample Sizes for Different Percent Changes",
+    color = "Percent Change",
+    y = "Power",
+    x = "After Samples (nA)"
+  ) 
+
 ```
 
+Plot power per percent change
+
+```{r}
+nA_grid <- 1:40
+detectable_df <- data.frame(
+  n_after = nA_grid,
+  min_detectable_percent = sapply(nA_grid, function(nA) {
+    find_min_detectable_percent(
+      S = site_number,
+      nB = nB,
+      nA = 5,
+      sd_within = logsd_within,
+      sd_delta = sd_delta_log,
+      logTransform = TRUE,
+      target_power = 0.8,
+      alpha = 0.05
+    )
+  })
+)
+
+ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
+  geom_line() +
+  geom_hline(yintercept = min_detectable_pct, linetype = "dashed", color = "red") +
+  labs(
+    title = "Minimum Detectable Percent Change vs. After Samples",
+    x = "Number of After Samples per Site",
+    y = "Minimum Detectable Percent Change"
+  )
+
+```
+
+
+### Example scenarios to test
+
+```{r}
+TestSetup<-expand.grid(Variable=c("logDensity","Density","Number","Presence"),
+                       PercentChange=c(10,20,30,40),
+                       n_after=c(3,5,10),
+                       delta_CV=c(0,0.1),
+                       Season=c("WET","DRY")
+                       )%>%
+  mutate(Distribution=case_when(Variable=="logDensity"~"normal",
+                                Variable=="Density"~"normal",
+                                Variable=="Number"~"nbinom",
+                                Variable=="Presence"~"Binomial"),
+         Test=case_when(Variable=="logDensity"~"t.test",
+                                Variable=="Density"~"t.test",
+                                Variable=="Number"~"t.test",
+                                Variable=="Presence"~"prop.test"),
+         sd_within=)
+View(TestSetup)
+```
+
+Still working on coding this. 

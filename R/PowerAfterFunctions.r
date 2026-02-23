@@ -353,9 +353,12 @@ power_for_nA_analytical <- function(nA, S, nB, delta, sd_within, sd_delta, alpha
 #' @returns A data frame containing the estimated within-site and between-site standard deviations, and the number of sites and before samples per site
 #' @export
 #'
-summarize_baseline <- function(baseline,siteVar="site",responseVar="y",
+summarize_baseline <- function(baseline,siteVar="site",
+                               responseVar="y",
+                               groupVar=NULL,
                                logTransform=FALSE,
-                               logAdd=0){
+                               logAdd=0
+                               ){
   returnVal<-baseline %>%
     group_by(!!sym(siteVar)) %>%
     summarize(
