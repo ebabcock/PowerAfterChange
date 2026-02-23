@@ -172,7 +172,7 @@ Calculate power for a range of nA values using simulation.
 ```{r}
 nA_grid <- 1:100
 power_values <- sapply(nA_grid, function(nA) {
-  power_for_nA(nA, S = site_number, 
+  power_for_nA_analytical(nA, S = site_number, 
                nB = nB, 
                delta = delta_target_log,
                 sd_within = logsd_within,
@@ -231,7 +231,7 @@ inputGrid$power <- mapply(function(nA, pct) {
   power_for_percent_change(
     S = site_number,
     nB = nB,
-    nA = nA_fixed,
+    nA = nA,
     sd_within = logsd_within,
     sd_delta = 0,
     baseline_mean = baseline_mean,
@@ -239,6 +239,7 @@ inputGrid$power <- mapply(function(nA, pct) {
     percent_change = pct,
     alpha = 0.05
   )}, inputGrid$nA, inputGrid$percent_change)
+
 ggplot(inputGrid, aes(x = nA, y = power, color = factor(percent_change))) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "black") +
@@ -261,7 +262,8 @@ detectable_df <- data.frame(
     find_min_detectable_percent(
       S = site_number,
       nB = nB,
-      nA = 5,
+      nA = nA,
+      baseline_mean = baseline_mean,
       sd_within = logsd_within,
       sd_delta = sd_delta_log,
       logTransform = TRUE,
@@ -270,7 +272,7 @@ detectable_df <- data.frame(
     )
   })
 )
-
+min_detectable_pct <- percent_change_res
 ggplot(detectable_df, aes(x = n_after, y = min_detectable_percent)) +
   geom_line() +
   geom_hline(yintercept = min_detectable_pct, linetype = "dashed", color = "red") +
@@ -299,19 +301,8 @@ TestSetup<-expand.grid(Variable=c("logDensity","Density","Number","Presence"),
          Test=case_when(Variable=="logDensity"~"t.test",
                                 Variable=="Density"~"t.test",
                                 Variable=="Number"~"t.test",
-                                Variable=="Presence"~"prop.test"),
-         sd_within=case_when(Variable=="logDensity"~fishSum$logsd_within[fishSum$Season==Season],
-                                Variable=="Density"~fishSum$sd_within[fishSum$Season==Season],
-                                Variable=="Number"~fishSum$sd_within[fishSum$Season==Season],
-                                Variable=="Presence"~NA_real_),
-         baseline_mean=case_when(Variable=="logDensity"~mean(fishTotal$logDensity[fishTotal$Season==Season]),
-                                Variable=="Density"~mean(fishTotal$Density[fishTotal$Season==Season]),
-                                Variable=="Number"~mean(fishTotal$Number[fishTotal$Season==Season]),
-                                Variable=="Presence"~mean(fishTotal$Presence[fishTotal$Season==Season])),
-         delta=case_when(Variable=="logDensity"~log(1+PercentChange/100),
-                                Variable=="Density"~log(1+PercentChange/100),
-                                Variable=="Number"~log(1+PercentChange/100,
-                                Variable=="Presence"~PercentChange/100),))
+                                Variable=="Presence"~"prop.test"))
+
 View(TestSetup)
 ```
 
