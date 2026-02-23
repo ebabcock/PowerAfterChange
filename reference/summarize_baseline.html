@@ -71,6 +71,10 @@ optionally log-transform the response variable to estimate these on the log scal
 <dd><p>Name of the response variable in baseline data</p></dd>
 
 
+<dt id="arg-groupvar">groupVar<a class="anchor" aria-label="anchor" href="#arg-groupvar"></a></dt>
+<dd><p>Optional character vector of grouping variables to summarize by</p></dd>
+
+
 <dt id="arg-logtransform">logTransform<a class="anchor" aria-label="anchor" href="#arg-logtransform"></a></dt>
 <dd><p>Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale</p></dd>
 
@@ -81,7 +85,9 @@ optionally log-transform the response variable to estimate these on the log scal
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame containing the estimated within-site and between-site standard deviations, and the number of sites and before samples per site</p>
+    <p>A data frame containing the estimated within-site and between-site standard deviations,
+the number of sites and before samples per site, and mean proportion positive by site,
+summarized by group when groupVar is provided.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

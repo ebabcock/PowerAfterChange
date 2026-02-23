@@ -31,6 +31,10 @@ summarize_baseline(
 
   Name of the response variable in baseline data
 
+- groupVar:
+
+  Optional character vector of grouping variables to summarize by
+
 - logTransform:
 
   Logical indicating whether to log-transform the response variable for
@@ -44,4 +48,6 @@ summarize_baseline(
 ## Value
 
 A data frame containing the estimated within-site and between-site
-standard deviations, and the number of sites and before samples per site
+standard deviations, the number of sites and before samples per site,
+and mean proportion positive by site, summarized by group when groupVar
+is provided.
