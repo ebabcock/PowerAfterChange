@@ -11,7 +11,7 @@ find_min_detectable_percent_2samp(
   S,
   nB,
   nA,
-  sd_w,
+  sd_pooled,
   baseline_mean,
   target_power = 0.8,
   alpha = 0.05
@@ -32,9 +32,9 @@ find_min_detectable_percent_2samp(
 
   Number of after measurements per site
 
-- sd_w:
+- sd_pooled:
 
-  Within-site standard deviation
+  Standard deviation among all data points
 
 - baseline_mean:
 

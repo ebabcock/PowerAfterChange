@@ -74,23 +74,13 @@ Babcock</h4>
 <p>The functions in this vignette calculate power and sample size for a
 <strong>two-sample (unpaired) t-test</strong> that compares all before
 observations pooled together against all after observations pooled
-together, without accounting for the repeated-measures structure of the
+together, without accounting for any repeated-measures structure of the
 data (i.e., multiple samples taken at the same site before and after the
-change).</p>
-<p>This contrasts with the paired-t approach in
-<code>UserGuide.Rmd</code>, where each site’s before-mean is subtracted
-from its after-mean, effectively blocking out between-site variability.
-When there is positive between-site variation in baseline levels, the
-paired design is <strong>more powerful</strong> because it removes that
-nuisance variability. The two-sample approach lumps all observations
-into two groups and ignores the blocking, which tends to inflate the
-error term (or, if between-site variability in changes is large, can
-sometimes be anti- conservative). In most ecological before-after
-designs where sites are truly paired, the paired approach is preferred.
-The two-sample approach is appropriate when before and after samples
-come from independent groups with no repeated site structure, or as a
-check or comparison.</p>
-<p>The new functions are:</p>
+change). This would be correct if the data points were collected at
+random sites. It would be approximately valid if there was not much
+repeatability in the measurments at each site in a repeated measures
+design.</p>
+<p>The functions are:</p>
 <ul>
 <li>
 <code><a href="../reference/power_for_n_after_2samp.html">power_for_n_after_2samp()</a></code> — simulation-based power for
@@ -127,19 +117,15 @@ minimum detectable percent change</li>
 <span>  site <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">S_demo</span>, each <span class="op">=</span> <span class="va">nB_demo</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">S_demo</span> <span class="op">*</span> <span class="va">nB_demo</span>, mean <span class="op">=</span> <span class="va">siteMean</span><span class="op">[</span><span class="va">site</span><span class="op">]</span>, sd <span class="op">=</span> <span class="va">sd_within</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="estimate-within-site-sd">Estimate within-site SD<a class="anchor" aria-label="anchor" href="#estimate-within-site-sd"></a>
+<h3 id="estimate-total-standard-deviation-among-samples">Estimate total standard deviation among samples<a class="anchor" aria-label="anchor" href="#estimate-total-standard-deviation-among-samples"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sd_within_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSD_within.html">getSD_within</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="va">baseline_demo</span>,</span>
-<span>                              siteVar <span class="op">=</span> <span class="st">"site"</span>,</span>
-<span>                              responseVar <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span>
-<span><span class="va">sd_within_hat</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 1.671255</span></span></code></pre>
+<code class="sourceCode R"><span><span class="va">sd_total</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">baseline_demo</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="planning-assumptions">Planning assumptions<a class="anchor" aria-label="anchor" href="#planning-assumptions"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">delta_target</span> <span class="op">&lt;-</span> <span class="fl">1</span>    <span class="co"># absolute change to detect</span></span>
 <span><span class="va">sd_delta</span>     <span class="op">&lt;-</span> <span class="fl">0.5</span>  <span class="co"># site-to-site variability in true changes</span></span></code></pre></div>
 <hr>
@@ -148,17 +134,16 @@ minimum detectable percent change</li>
 <div class="section level2">
 <h2 id="question-1-minimum-number-of-sites-nb-5-na-5">Question 1: Minimum number of sites (nB = 5, nA = 5)<a class="anchor" aria-label="anchor" href="#question-1-minimum-number-of-sites-nb-5-na-5"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sites_2samp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_min_sites_2samp.html">find_min_sites_2samp</a></span><span class="op">(</span></span>
 <span>  nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
-<span>  sd_w  <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
+<span>  sd_w  <span class="op">=</span> <span class="va">sd_total</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  S_grid <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">50</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sites_2samp</span><span class="op">$</span><span class="va">S_star</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 9</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">sites_2samp</span><span class="op">$</span><span class="va">curve</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">S</span>, y <span class="op">=</span> <span class="va">power</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -166,28 +151,20 @@ minimum detectable percent change</li>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Two-sample t-test: Power Curve for Number of Sites"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Number of Sites"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="TwoSampleTTest_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
-<p>In <code>UserGuide.Rmd</code> the paired design required fewer sites
-when including between-site change variability (<code>sd_d</code>). The
-two-sample approach requires 9 sites when <code>sd_d = 0</code>, because
-it ignores the paired structure and must rely solely on pooled
-within-site variability.</p>
-<hr>
 </div>
 <div class="section level2">
 <h2 id="question-2-minimum-after-samples-per-site-s-12-nb-5">Question 2: Minimum after samples per site (S = 12, nB = 5)<a class="anchor" aria-label="anchor" href="#question-2-minimum-after-samples-per-site-s-12-nb-5"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_after_2samp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_n_after_2samp.html">find_n_after_2samp</a></span><span class="op">(</span></span>
 <span>  S  <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>,</span>
 <span>  delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
-<span>  sd_w  <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
+<span>  sd_pooled  <span class="op">=</span> <span class="va">sd_total</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  n_grid <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">n_after_2samp</span><span class="op">$</span><span class="va">n_star</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 3</span></span></code></pre>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">n_after_2samp</span><span class="op">$</span><span class="va">curve</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_after</span>, y <span class="op">=</span> <span class="va">power</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.8</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -195,32 +172,30 @@ within-site variability.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Two-sample t-test: Power Curve for After Samples per Site"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Number of After Samples per Site"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="TwoSampleTTest_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="question-3-minimum-detectable-percent-change-s-12-nb-5-na-5">Question 3: Minimum detectable percent change (S = 12, nB = 5, nA =
 5)<a class="anchor" aria-label="anchor" href="#question-3-minimum-detectable-percent-change-s-12-nb-5-na-5"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">min_pct_2samp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_min_detectable_percent_2samp.html">find_min_detectable_percent_2samp</a></span><span class="op">(</span></span>
 <span>  S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
+<span>  sd_pooled <span class="op">=</span> <span class="va">sd_total</span>,</span>
 <span>  baseline_mean <span class="op">=</span> <span class="va">before_mean</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">min_pct_2samp</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 8.61903</span></span></code></pre>
 <p>How does the minimum detectable percent change vary with the number
 of after samples?</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span><span class="va">detectable_2samp_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  n_after <span class="op">=</span> <span class="va">nA_grid</span>,</span>
 <span>  min_detectable_percent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_grid</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/find_min_detectable_percent_2samp.html">find_min_detectable_percent_2samp</a></span><span class="op">(</span></span>
 <span>      S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="va">nA</span>,</span>
-<span>      sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>,</span>
+<span>      sd_pooled <span class="op">=</span> <span class="va">sd_total</span>,</span>
 <span>      baseline_mean <span class="op">=</span> <span class="va">before_mean</span>,</span>
 <span>      target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span>    <span class="op">)</span></span>
@@ -235,7 +210,6 @@ of after samples?</p>
 <span>    x <span class="op">=</span> <span class="st">"Number of After Samples per Site"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Minimum Detectable Percent Change"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="TwoSampleTTest_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -247,10 +221,13 @@ t-test</strong> (<code>power_for_nA_analytical</code>) against the
 the same design parameters. The paired design accounts for between-site
 variability in changes (<code>sd_d</code>), while the two-sample design
 ignores site structure entirely.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span></span>
 <span><span class="co"># Paired analytical power (includes sd_delta for between-site change variability)</span></span>
+<span><span class="va">sd_within_hat</span> <span class="op">&lt;-</span><span class="fu"><a href="../reference/getSD_within.html">getSD_within</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="va">baseline_demo</span>,</span>
+<span>                             siteVar <span class="op">=</span> <span class="st">"site"</span>,</span>
+<span>                             responseVar <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span>
 <span><span class="va">power_paired</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_grid</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/power_for_nA_analytical.html">power_for_nA_analytical</a></span><span class="op">(</span><span class="va">nA</span>, S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>,</span>
 <span>                          delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
@@ -283,7 +260,6 @@ ignores site structure entirely.</p>
 <span>    color <span class="op">=</span> <span class="st">"Method"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="TwoSampleTTest_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 <p>The paired design is more efficient here: it typically reaches target
 power with fewer after samples because it eliminates between-site
 baseline variability as a source of error.</p>
@@ -296,13 +272,13 @@ baseline variability as a source of error.</p>
 comparing them to simulation-based estimates from
 <code>power_for_n_after_2samp</code> for a few values of
 <code>nA</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nA_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sim_power</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_check</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/power_for_n_after_2samp.html">power_for_n_after_2samp</a></span><span class="op">(</span></span>
 <span>    S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="va">nA</span>,</span>
-<span>    delta <span class="op">=</span> <span class="va">delta_target</span>, sd_w <span class="op">=</span> <span class="va">sd_within_hat</span>, sd_d <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>    delta <span class="op">=</span> <span class="va">delta_target</span>, sd_w <span class="op">=</span> <span class="va">sd_total</span>, sd_d <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>    alpha <span class="op">=</span> <span class="fl">0.05</span>, nsim <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
@@ -318,36 +294,6 @@ comparing them to simulation-based estimates from
 <span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">validation_df</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"Two-sample t-test: Analytical vs. Simulation Power"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>Two-sample t-test: Analytical vs. Simulation Power</caption>
-<thead><tr class="header">
-<th align="right">nA</th>
-<th align="right">Analytical</th>
-<th align="right">Simulation</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">2</td>
-<td align="right">0.687</td>
-<td align="right">0.672</td>
-</tr>
-<tr class="even">
-<td align="right">5</td>
-<td align="right">0.902</td>
-<td align="right">0.907</td>
-</tr>
-<tr class="odd">
-<td align="right">10</td>
-<td align="right">0.964</td>
-<td align="right">0.962</td>
-</tr>
-<tr class="even">
-<td align="right">20</td>
-<td align="right">0.985</td>
-<td align="right">0.985</td>
-</tr>
-</tbody>
-</table>
 <p>The simulation and analytical results agree closely, confirming that
 the analytical formula based on the non-central t distribution is
 correct.</p>

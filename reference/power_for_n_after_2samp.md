@@ -11,7 +11,7 @@ power_for_n_after_2samp(
   nB,
   nA,
   delta,
-  sd_w,
+  sd_pooled,
   sd_d = 0,
   alpha = 0.05,
   nsim = 2000,
@@ -37,9 +37,9 @@ power_for_n_after_2samp(
 
   Hypothesized mean change
 
-- sd_w:
+- sd_pooled:
 
-  Within-site standard deviation
+  Standard deviation between samples
 
 - sd_d:
 

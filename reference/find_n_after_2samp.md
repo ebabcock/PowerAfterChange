@@ -11,7 +11,7 @@ find_n_after_2samp(
   S,
   nB,
   delta,
-  sd_w,
+  sd_pooled,
   target_power = 0.8,
   alpha = 0.05,
   n_grid = 1:50
@@ -32,9 +32,9 @@ find_n_after_2samp(
 
   Hypothesized mean change
 
-- sd_w:
+- sd_pooled:
 
-  Within-site standard deviation
+  Standard deviation among all samples
 
 - target_power:
 
