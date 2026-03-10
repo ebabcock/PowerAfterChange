@@ -1,4 +1,4 @@
-# Two-sample t-test power analysis (ignoring within-site correlation)
+# Two-sample t-test power analysis
 
 ## Overview
 
@@ -67,12 +67,14 @@ sd_delta     <- 0.5  # site-to-site variability in true changes
 sites_2samp <- find_min_sites_2samp(
   nB = nB_demo, nA = 5,
   delta = delta_target,
-  sd_w  = sd_total,
+  sd_pooled  = sd_total,
   target_power = 0.8, alpha = 0.05,
   S_grid = 2:50
 )
 sites_2samp$S_star
 ```
+
+    ## [1] 12
 
 ``` r
 ggplot(sites_2samp$curve, aes(x = S, y = power)) +
@@ -83,6 +85,8 @@ ggplot(sites_2samp$curve, aes(x = S, y = power)) +
        x = "Number of Sites",
        y = "Power")
 ```
+
+![](TwoSampleTTest_files/figure-html/unnamed-chunk-6-1.png)
 
 ## Question 2: Minimum after samples per site (S = 12, nB = 5)
 
@@ -97,6 +101,8 @@ n_after_2samp <- find_n_after_2samp(
 n_after_2samp$n_star
 ```
 
+    ## [1] 5
+
 ``` r
 ggplot(n_after_2samp$curve, aes(x = n_after, y = power)) +
   geom_line() +
@@ -106,6 +112,8 @@ ggplot(n_after_2samp$curve, aes(x = n_after, y = power)) +
        x = "Number of After Samples per Site",
        y = "Power")
 ```
+
+![](TwoSampleTTest_files/figure-html/unnamed-chunk-8-1.png)
 
 ------------------------------------------------------------------------
 
@@ -120,6 +128,8 @@ min_pct_2samp <- find_min_detectable_percent_2samp(
 )
 min_pct_2samp
 ```
+
+    ## [1] 9.813063
 
 How does the minimum detectable percent change vary with the number of
 after samples?
@@ -147,6 +157,8 @@ ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
     y = "Minimum Detectable Percent Change"
   )
 ```
+
+![](TwoSampleTTest_files/figure-html/unnamed-chunk-10-1.png)
 
 ------------------------------------------------------------------------
 
@@ -199,6 +211,8 @@ ggplot(comparison_df, aes(x = n_after, y = power, color = Method)) +
   theme(legend.position = "bottom")
 ```
 
+![](TwoSampleTTest_files/figure-html/unnamed-chunk-11-1.png)
+
 The paired design is more efficient here: it typically reaches target
 power with fewer after samples because it eliminates between-site
 baseline variability as a source of error.
@@ -217,7 +231,7 @@ nA_check <- c(2, 5, 10, 20)
 sim_power <- sapply(nA_check, function(nA) {
   power_for_n_after_2samp(
     S = S_demo, nB = nB_demo, nA = nA,
-    delta = delta_target, sd_w = sd_total, sd_d = 0,
+    delta = delta_target, sd_pooled = sd_total, sd_d = 0,
     alpha = 0.05, nsim = 2000, seed = 42
   )
 })
@@ -234,6 +248,15 @@ validation_df <- data.frame(
 knitr::kable(validation_df,
              caption = "Two-sample t-test: Analytical vs. Simulation Power")
 ```
+
+|  nA | Analytical | Simulation |
+|----:|-----------:|-----------:|
+|   2 |      0.576 |      0.561 |
+|   5 |      0.815 |      0.815 |
+|  10 |      0.911 |      0.912 |
+|  20 |      0.952 |      0.949 |
+
+Two-sample t-test: Analytical vs. Simulation Power
 
 The simulation and analytical results agree closely, confirming that the
 analytical formula based on the non-central t distribution is correct.

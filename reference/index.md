@@ -20,6 +20,8 @@
   : getSD_difference
 - [`getSD_within()`](https://ebabcock.github.io/PowerAfterChange/reference/getSD_within.md)
   : getSD_within
+- [`power_2samp_analytical()`](https://ebabcock.github.io/PowerAfterChange/reference/power_2samp_analytical.md)
+  : power_2samp_analytical
 - [`power_for_nA_analytical()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_nA_analytical.md)
   : power_for_nA
 - [`power_for_n_after()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_n_after.md)

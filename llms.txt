@@ -44,6 +44,8 @@ simulated data example.
   : getSD_difference
 - [`getSD_within()`](https://ebabcock.github.io/PowerAfterChange/reference/getSD_within.md)
   : getSD_within
+- [`power_2samp_analytical()`](https://ebabcock.github.io/PowerAfterChange/reference/power_2samp_analytical.md)
+  : power_2samp_analytical
 - [`power_for_nA_analytical()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_nA_analytical.md)
   : power_for_nA
 - [`power_for_n_after()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_n_after.md)
@@ -63,7 +65,7 @@ simulated data example.
 
 - [PowerAfterChange: Simulation Tests for Alternative Distributions and
   Tests](https://ebabcock.github.io/PowerAfterChange/articles/NonNormalDistributionsAndTests.md):
-- [Two-sample t-test power analysis (ignoring within-site
-  correlation)](https://ebabcock.github.io/PowerAfterChange/articles/TwoSampleTTest.md):
+- [Two-sample t-test power
+  analysis](https://ebabcock.github.io/PowerAfterChange/articles/TwoSampleTTest.md):
 - [User guide for power after
   change](https://ebabcock.github.io/PowerAfterChange/articles/UserGuide.md):
