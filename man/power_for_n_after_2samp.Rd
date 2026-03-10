@@ -9,7 +9,7 @@ power_for_n_after_2samp(
   nB,
   nA,
   delta,
-  sd_w,
+  sd_pooled,
   sd_d = 0,
   alpha = 0.05,
   nsim = 2000,
@@ -25,7 +25,7 @@ power_for_n_after_2samp(
 
 \item{delta}{Hypothesized mean change}
 
-\item{sd_w}{Within-site standard deviation}
+\item{sd_pooled}{Standard deviation between samples}
 
 \item{sd_d}{Between-site standard deviation of true changes (default 0)}
 

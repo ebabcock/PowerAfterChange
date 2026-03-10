@@ -8,7 +8,7 @@ find_min_sites_2samp(
   nB,
   nA,
   delta,
-  sd_w,
+  sd_pooled,
   target_power = 0.8,
   alpha = 0.05,
   S_grid = 2:50
@@ -21,7 +21,7 @@ find_min_sites_2samp(
 
 \item{delta}{Hypothesized mean change (absolute, on the scale of the response)}
 
-\item{sd_w}{Within-site standard deviation}
+\item{sd_pooled}{Standard deviation among all samples}
 
 \item{target_power}{Desired power level (default 0.8)}
 

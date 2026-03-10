@@ -1,34 +1,28 @@
----
-title: "Two-sample t-test power analysis (ignoring within-site correlation)"
-author: "Beth Babcock"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Two-sample t-test power (ignoring correlation)}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval=FALSE)
-```
+# Two-sample t-test power analysis (ignoring within-site correlation)
 
 ## Overview
 
 The functions in this vignette calculate power and sample size for a
-**two-sample (unpaired) t-test** that compares all before observations pooled
-together against all after observations pooled together, without accounting for
-any repeated-measures structure of the data (i.e., multiple samples taken at
-the same site before and after the change). This would be correct if the data points were collected at random sites. It would be approximately valid if there was not much repeatability in the measurments at each site in a repeated measures design.
+**two-sample (unpaired) t-test** that compares all before observations
+pooled together against all after observations pooled together, without
+accounting for any repeated-measures structure of the data (i.e.,
+multiple samples taken at the same site before and after the change).
+This would be correct if the data points were collected at random sites.
+It would be approximately valid if there was not much repeatability in
+the measurments at each site in a repeated measures design.
 
 The functions are:
 
-- `power_for_n_after_2samp()` — simulation-based power for a two-sample t-test
-- `find_min_sites_2samp()` — analytical minimum sites needed for target power
-- `find_n_after_2samp()` — analytical minimum after samples per site for target power
-- `find_min_detectable_percent_2samp()` — analytical minimum detectable percent change
+- [`power_for_n_after_2samp()`](https://ebabcock.github.io/PowerAfterChange/reference/power_for_n_after_2samp.md)
+  — simulation-based power for a two-sample t-test
+- [`find_min_sites_2samp()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_sites_2samp.md)
+  — analytical minimum sites needed for target power
+- [`find_n_after_2samp()`](https://ebabcock.github.io/PowerAfterChange/reference/find_n_after_2samp.md)
+  — analytical minimum after samples per site for target power
+- [`find_min_detectable_percent_2samp()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_detectable_percent_2samp.md)
+  — analytical minimum detectable percent change
 
-```{r,message=FALSE,warning=FALSE}
+``` r
 library(tidyverse)
 theme_set(theme_minimal())
 library(PowerAfterChange)
@@ -36,10 +30,10 @@ library(PowerAfterChange)
 
 ## Simulated data
 
-We use the **same simulated dataset** as `UserGuide.Rmd` so that results can
-be directly compared.
+We use the **same simulated dataset** as `UserGuide.Rmd` so that results
+can be directly compared.
 
-```{r}
+``` r
 set.seed(123)
 S_demo    <- 12
 nB_demo   <- 5
@@ -54,22 +48,22 @@ baseline_demo <- data.frame(
 
 ### Estimate total standard deviation among samples
 
-```{r}
+``` r
 sd_total <- sd(baseline_demo$y)
 ```
 
 ### Planning assumptions
 
-```{r}
+``` r
 delta_target <- 1    # absolute change to detect
 sd_delta     <- 0.5  # site-to-site variability in true changes
 ```
 
----
+------------------------------------------------------------------------
 
 ## Question 1: Minimum number of sites (nB = 5, nA = 5)
 
-```{r}
+``` r
 sites_2samp <- find_min_sites_2samp(
   nB = nB_demo, nA = 5,
   delta = delta_target,
@@ -80,7 +74,7 @@ sites_2samp <- find_min_sites_2samp(
 sites_2samp$S_star
 ```
 
-```{r}
+``` r
 ggplot(sites_2samp$curve, aes(x = S, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -92,7 +86,7 @@ ggplot(sites_2samp$curve, aes(x = S, y = power)) +
 
 ## Question 2: Minimum after samples per site (S = 12, nB = 5)
 
-```{r}
+``` r
 n_after_2samp <- find_n_after_2samp(
   S  = S_demo, nB = nB_demo,
   delta = delta_target,
@@ -103,7 +97,7 @@ n_after_2samp <- find_n_after_2samp(
 n_after_2samp$n_star
 ```
 
-```{r}
+``` r
 ggplot(n_after_2samp$curve, aes(x = n_after, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -113,11 +107,11 @@ ggplot(n_after_2samp$curve, aes(x = n_after, y = power)) +
        y = "Power")
 ```
 
----
+------------------------------------------------------------------------
 
 ## Question 3: Minimum detectable percent change (S = 12, nB = 5, nA = 5)
 
-```{r}
+``` r
 min_pct_2samp <- find_min_detectable_percent_2samp(
   S = S_demo, nB = nB_demo, nA = 5,
   sd_pooled = sd_total,
@@ -127,10 +121,10 @@ min_pct_2samp <- find_min_detectable_percent_2samp(
 min_pct_2samp
 ```
 
-How does the minimum detectable percent change vary with the number of after
-samples?
+How does the minimum detectable percent change vary with the number of
+after samples?
 
-```{r}
+``` r
 nA_grid <- 1:40
 detectable_2samp_df <- data.frame(
   n_after = nA_grid,
@@ -154,9 +148,9 @@ ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
   )
 ```
 
----
+------------------------------------------------------------------------
 
-## Comparing paired t-test vs. two-sample t-test power curves
+## Comparing paired t-test vs. two-sample t-test power curves
 
 The plot below overlays the power curve from the **paired t-test**
 (`power_for_nA_analytical`) against the **two-sample t-test**
@@ -164,7 +158,7 @@ The plot below overlays the power curve from the **paired t-test**
 accounts for between-site variability in changes (`sd_d`), while the
 two-sample design ignores site structure entirely.
 
-```{r}
+``` r
 nA_grid <- 1:40
 
 # Paired analytical power (includes sd_delta for between-site change variability)
@@ -205,19 +199,19 @@ ggplot(comparison_df, aes(x = n_after, y = power, color = Method)) +
   theme(legend.position = "bottom")
 ```
 
-The paired design is more efficient here: it typically reaches target power
-with fewer after samples because it eliminates between-site baseline
-variability as a source of error.
+The paired design is more efficient here: it typically reaches target
+power with fewer after samples because it eliminates between-site
+baseline variability as a source of error.
 
----
+------------------------------------------------------------------------
 
 ## Simulation validation
 
-We validate the analytical `find_n_after_2samp` results by comparing them to
-simulation-based estimates from `power_for_n_after_2samp` for a few values of
-`nA`.
+We validate the analytical `find_n_after_2samp` results by comparing
+them to simulation-based estimates from `power_for_n_after_2samp` for a
+few values of `nA`.
 
-```{r,message=FALSE,warning=FALSE}
+``` r
 nA_check <- c(2, 5, 10, 20)
 
 sim_power <- sapply(nA_check, function(nA) {
@@ -244,15 +238,16 @@ knitr::kable(validation_df,
 The simulation and analytical results agree closely, confirming that the
 analytical formula based on the non-central t distribution is correct.
 
----
+------------------------------------------------------------------------
 
 ## Conclusion
 
 The **paired t-test** (existing functions) is preferred when sites are
 genuinely paired and repeated samples are taken at each site, because it
-accounts for within-site correlation and is more powerful. The **two-sample
-approach** is appropriate when before and after samples come from independent
-groups with no repeated site structure, or as a conservative check or
-comparison. When there is positive between-site variation in baselines, the
-two-sample approach will generally require more sites or more samples to
-achieve the same power as the paired design.
+accounts for within-site correlation and is more powerful. The
+**two-sample approach** is appropriate when before and after samples
+come from independent groups with no repeated site structure, or as a
+conservative check or comparison. When there is positive between-site
+variation in baselines, the two-sample approach will generally require
+more sites or more samples to achieve the same power as the paired
+design.

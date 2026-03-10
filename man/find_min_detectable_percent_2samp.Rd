@@ -8,7 +8,7 @@ find_min_detectable_percent_2samp(
   S,
   nB,
   nA,
-  sd_w,
+  sd_pooled,
   baseline_mean,
   target_power = 0.8,
   alpha = 0.05
@@ -21,7 +21,7 @@ find_min_detectable_percent_2samp(
 
 \item{nA}{Number of after measurements per site}
 
-\item{sd_w}{Within-site standard deviation}
+\item{sd_pooled}{Standard deviation among all data points}
 
 \item{baseline_mean}{Mean of the response variable before the change (used to
 convert the detectable absolute delta to a percent change)}

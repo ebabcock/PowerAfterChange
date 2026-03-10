@@ -28,7 +28,7 @@ The functions were generated with the help of ChatGPT and GitHub Copilot (variou
 
 The following is a simulated data demo. The simulated data is data before the change, and we use this data to get an estimate of the within-site standard deviation needed for planning. The data are simulated with site-to-site variability and within-site variability, using a normal distribution. 
 
-The functions in `PowerAfterChange` are designed to be flexible and can be used with negative binomial and binomial distributions, and normal wiht and without log-transformation, but here we show the normal case with no log transformation for simplicity and to compare with power.t.test.
+The functions in `PowerAfterChange` are designed to be flexible and can be used with negative binomial and binomial distributions, and normal with and without log-transformation, but here we show the normal case with no log transformation for simplicity and to compare with power.t.test.
 
 ```{r,message=FALSE,warning=FALSE}
 library(tidyverse)

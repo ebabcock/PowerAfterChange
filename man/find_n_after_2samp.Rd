@@ -8,7 +8,7 @@ find_n_after_2samp(
   S,
   nB,
   delta,
-  sd_w,
+  sd_pooled,
   target_power = 0.8,
   alpha = 0.05,
   n_grid = 1:50
@@ -21,7 +21,7 @@ find_n_after_2samp(
 
 \item{delta}{Hypothesized mean change}
 
-\item{sd_w}{Within-site standard deviation}
+\item{sd_pooled}{Standard deviation among all samples}
 
 \item{target_power}{Desired power level (default 0.8)}
 

@@ -37,7 +37,7 @@ using a normal distribution.
 
 The functions in `PowerAfterChange` are designed to be flexible and can
 be used with negative binomial and binomial distributions, and normal
-wiht and without log-transformation, but here we show the normal case
+with and without log-transformation, but here we show the normal case
 with no log transformation for simplicity and to compare with
 power.t.test.
 

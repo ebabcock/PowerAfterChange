@@ -526,7 +526,6 @@ power_for_percent_change <- function(percent_change,
 #' @param sd_w Within-site standard deviation (or pooled standard deviation across all samples)
 #' @param alpha Significance level (default 0.05)
 #'
-#' @returns
 #' @export
 #'
 power_2samp_analytical <- function(n_before, n_after, delta, sd_pooled, alpha) {
