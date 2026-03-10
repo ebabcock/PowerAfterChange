@@ -82,7 +82,9 @@ nB <- 10  #number of samples before the change per site for fixed number of site
 logsd_within <- fishSum %>%
   filter(Season == "DRY") %>%
   pull(logsd_within)
-site_number<-16
+site_number<-52
+#Mean before in original units for percent conversion.
+baseline_mean <- mean(fishTotal$Density[fishTotal$Season=="DRY"])  
 ```
 
 ### (Question 1) Find minimum sites given before and after number known sample size
@@ -170,7 +172,7 @@ res_n_after$n_star  #Number of after samples need for specified power
 Calculate power for a range of nA values using simulation.
 
 ```{r}
-nA_grid <- 1:100
+nA_grid <- 1:20
 power_values <- sapply(nA_grid, function(nA) {
   power_for_nA_analytical(nA, S = site_number, 
                nB = nB, 
@@ -211,8 +213,6 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
 ### (Question 3) Find minimum percent change detectable
 
 ```{r}
-baseline_mean <- mean(fishTotal$Density[fishTotal$Season=="DRY"])  
-  
 percent_change_res <- find_min_detectable_percent(S = site_number, 
                                                nB = nB,
                                                nA = nA_fixed,
@@ -226,7 +226,7 @@ percent_change_res <- find_min_detectable_percent(S = site_number,
 percent_change_res  #Minimum percent change detectable for specified power 
 
 #Map for some values of nA
-inputGrid<-expand.grid(nA = 2:10, percent_change = seq(5,30,5))
+inputGrid<-expand.grid(nA = 2:10, percent_change = seq(5,50,5))
 inputGrid$power <- mapply(function(nA, pct) {
   power_for_percent_change(
     S = site_number,
