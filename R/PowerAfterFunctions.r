@@ -517,8 +517,10 @@ power_for_percent_change <- function(percent_change,
   return(power_result$power)
 }
 
-# Analytical power for a two-sample (unpaired) t-test
-# using the non-central t distribution. Handles unbalanced group sizes.
+#' power_2samp_analytical
+#'
+#' Analytical power for a two-sample (unpaired) t-test
+#' using the non-central t distribution. Handles unbalanced group sizes.
 #'
 #' @param n_before Number of before measurements (total across all sites)
 #' @param n_after Number of after measurements (total across all sites)
@@ -616,6 +618,7 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #' @returns A list with `S_star` (minimum sites for target power) and `curve`
 #'   (data frame of S and power)
 #' @export
+#'
 find_min_sites_2samp <- function(nB, nA,
                                  delta, sd_pooled,
                                  target_power = 0.8,
