@@ -517,11 +517,21 @@ power_for_percent_change <- function(percent_change,
   return(power_result$power)
 }
 
-# Internal helper: analytical power for a two-sample (unpaired) t-test
+# Analytical power for a two-sample (unpaired) t-test
 # using the non-central t distribution. Handles unbalanced group sizes.
-power_2samp_analytical <- function(n_before, n_after, delta, sd_w, alpha) {
+#'
+#' @param n_before Number of before measurements (total across all sites)
+#' @param n_after Number of after measurements (total across all sites)
+#' @param delta Hypothesized mean change (absolute, on the scale of the response)
+#' @param sd_w Within-site standard deviation (or pooled standard deviation across all samples)
+#' @param alpha Significance level (default 0.05)
+#'
+#' @returns
+#' @export
+#'
+power_2samp_analytical <- function(n_before, n_after, delta, sd_pooled, alpha) {
   df    <- n_before + n_after - 2
-  ncp   <- delta / (sd_w * sqrt(1 / n_before + 1 / n_after))
+  ncp   <- delta / (sd_pooled * sqrt(1 / n_before + 1 / n_after))
   t_crit <- qt(1 - alpha / 2, df = df)
   pt(-t_crit, df = df, ncp = ncp) +
     pt(t_crit, df = df, ncp = ncp, lower.tail = FALSE)
@@ -536,7 +546,7 @@ power_2samp_analytical <- function(n_before, n_after, delta, sd_w, alpha) {
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
 #' @param delta Hypothesized mean change
-#' @param sd_w Within-site standard deviation
+#' @param sd_pooled Standard deviation between samples
 #' @param sd_d Between-site standard deviation of true changes (default 0)
 #' @param alpha Significance level, defaults to 0.05
 #' @param nsim Number of simulations to run
@@ -545,13 +555,13 @@ power_2samp_analytical <- function(n_before, n_after, delta, sd_w, alpha) {
 #' @returns Estimated power (numeric scalar)
 #' @export
 power_for_n_after_2samp <- function(S, nB, nA,
-                                    delta, sd_w, sd_d = 0,
+                                    delta, sd_pooled, sd_d = 0,
                                     alpha = 0.05, nsim = 2000, seed = 1) {
   set.seed(seed)
   pvals <- replicate(nsim, {
     true_change <- rnorm(S, mean = delta, sd = sd_d)
-    yB <- matrix(rnorm(S * nB, mean = 0, sd = sd_w), nrow = S)
-    yA <- matrix(rnorm(S * nA, mean = true_change, sd = sd_w), nrow = S)
+    yB <- matrix(rnorm(S * nB, mean = 0, sd = sd_pooled), nrow = S)
+    yA <- matrix(rnorm(S * nA, mean = true_change, sd = sd_pooled), nrow = S)
     all_before <- as.vector(yB)
     all_after  <- as.vector(yA)
     t.test(all_after, all_before, var.equal = TRUE)$p.value
@@ -567,7 +577,7 @@ power_for_n_after_2samp <- function(S, nB, nA,
 #' @param S Number of sites
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
-#' @param sd_w Within-site standard deviation
+#' @param sd_pooled Standard deviation among all data points
 #' @param baseline_mean Mean of the response variable before the change (used to
 #'   convert the detectable absolute delta to a percent change)
 #' @param target_power Desired power (default 0.8)
@@ -576,14 +586,14 @@ power_for_n_after_2samp <- function(S, nB, nA,
 #' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
 #' @export
 find_min_detectable_percent_2samp <- function(S, nB, nA,
-                                              sd_w,
+                                              sd_pooled,
                                               baseline_mean,
                                               target_power = 0.8,
                                               alpha = 0.05) {
   n_before <- S * nB
   n_after  <- S * nA
   power_root_func <- function(delta) {
-    power_2samp_analytical(n_before, n_after, delta, sd_w, alpha) - target_power
+    power_2samp_analytical(n_before, n_after, delta, sd_pooled, alpha) - target_power
   }
   fit <- uniroot(power_root_func, interval = c(1e-6, 1e6))  # wide enough for any realistic delta
   delta_required <- fit$root
@@ -599,7 +609,7 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
 #' @param delta Hypothesized mean change (absolute, on the scale of the response)
-#' @param sd_w Within-site standard deviation
+#' @param sd_pooled Standard deviation among all samples
 #' @param target_power Desired power level (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #' @param S_grid Grid of site numbers to evaluate (default 2:50)
@@ -608,12 +618,12 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #'   (data frame of S and power)
 #' @export
 find_min_sites_2samp <- function(nB, nA,
-                                 delta, sd_w,
+                                 delta, sd_pooled,
                                  target_power = 0.8,
                                  alpha = 0.05,
                                  S_grid = 2:50) {
   pow <- sapply(S_grid, function(S) {
-    power_2samp_analytical(S * nB, S * nA, delta, sd_w, alpha)
+    power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
   })
   out    <- data.frame(S = S_grid, power = pow)
   S_star <- out$S[which(out$power >= target_power)[1]]
@@ -629,7 +639,7 @@ find_min_sites_2samp <- function(nB, nA,
 #' @param S Number of sites
 #' @param nB Number of before measurements per site
 #' @param delta Hypothesized mean change
-#' @param sd_w Within-site standard deviation
+#' @param sd_pooled Standard deviation among all samples
 #' @param target_power Desired power level (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #' @param n_grid Grid of after measurements to evaluate (default 1:50)
@@ -638,12 +648,13 @@ find_min_sites_2samp <- function(nB, nA,
 #'   and `curve` (data frame of n_after and power)
 #' @export
 find_n_after_2samp <- function(S, nB,
-                               delta, sd_w,
+                               delta,
+                               sd_pooled,
                                target_power = 0.8,
                                alpha = 0.05,
                                n_grid = 1:50) {
   pow <- sapply(n_grid, function(nA) {
-    power_2samp_analytical(S * nB, S * nA, delta, sd_w, alpha)
+    power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
   })
   out    <- data.frame(n_after = n_grid, power = pow)
   n_star <- out$n_after[which(out$power >= target_power)[1]]
