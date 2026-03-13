@@ -30,7 +30,8 @@ fishTotal<-fish %>%
   ungroup() %>%
   mutate(Density=Number/area_sampled,
          Presence=if_else(Number>0,1,0),
-         logDensity=log(Density+0.00001))
+         logDensity=log(Density+0.00001),
+         sqrtDensity=sqrt(Density+0.5))
 
 ggplot(fishTotal, aes(x = factor(Site), y = logDensity,color=Season)) +
   geom_boxplot() +
@@ -48,9 +49,9 @@ The summarize_baseline function gives us the sd_within and sd_among sites in the
 ```{r}
 fishSum<-summarize_baseline(fishTotal,
                             siteVar ="Site",
-                            responseVar = "Density",
+                            responseVar = "sqrtDensity",
                             groupVar = c("Season"),
-                            logTransform = TRUE,
+                            logTransform = FALSE,
                             logAdd = 0.00001)
 fishSum
 
