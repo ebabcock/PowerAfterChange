@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Two-sample t-test power analysis (ignoring within-site correlation) • PowerAfterChange</title>
+<title>Two-sample t-test power analysis • PowerAfterChange</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Two-sample t-test power analysis (ignoring within-site correlation)">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Two-sample t-test power analysis">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,7 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/NonNormalDistributionsAndTests.html">PowerAfterChange: Simulation Tests for Alternative Distributions and Tests</a></li>
-    <li><a class="dropdown-item" href="../articles/TwoSampleTTest.html">Two-sample t-test power analysis (ignoring within-site correlation)</a></li>
+    <li><a class="dropdown-item" href="../articles/TwoSampleTTest.html">Two-sample t-test power analysis</a></li>
     <li><a class="dropdown-item" href="../articles/UserGuide.html">User guide for power after change</a></li>
   </ul>
 </li>
@@ -56,11 +56,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Two-sample t-test power analysis (ignoring within-site correlation)</h1>
+      <h1>Two-sample t-test power analysis</h1>
                         <h4 data-toc-skip class="author">Beth
 Babcock</h4>
             
-            <h4 data-toc-skip class="date">2026-03-10</h4>
+            <h4 data-toc-skip class="date">2026-03-16</h4>
       
 
       <div class="d-none name"><code>TwoSampleTTest.Rmd</code></div>
@@ -138,7 +138,7 @@ minimum detectable percent change</li>
 <code class="sourceCode R"><span><span class="va">sites_2samp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_min_sites_2samp.html">find_min_sites_2samp</a></span><span class="op">(</span></span>
 <span>  nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  delta <span class="op">=</span> <span class="va">delta_target</span>,</span>
-<span>  sd_w  <span class="op">=</span> <span class="va">sd_total</span>,</span>
+<span>  sd_pooled  <span class="op">=</span> <span class="va">sd_total</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  S_grid <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">50</span></span>
 <span><span class="op">)</span></span>
@@ -278,7 +278,7 @@ comparing them to simulation-based estimates from
 <span><span class="va">sim_power</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_check</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/power_for_n_after_2samp.html">power_for_n_after_2samp</a></span><span class="op">(</span></span>
 <span>    S <span class="op">=</span> <span class="va">S_demo</span>, nB <span class="op">=</span> <span class="va">nB_demo</span>, nA <span class="op">=</span> <span class="va">nA</span>,</span>
-<span>    delta <span class="op">=</span> <span class="va">delta_target</span>, sd_w <span class="op">=</span> <span class="va">sd_total</span>, sd_d <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>    delta <span class="op">=</span> <span class="va">delta_target</span>, sd_pooled <span class="op">=</span> <span class="va">sd_total</span>, sd_d <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>    alpha <span class="op">=</span> <span class="fl">0.05</span>, nsim <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>

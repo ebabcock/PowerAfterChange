@@ -51,8 +51,8 @@ optionally log-transform the response variable to estimate these on the log scal
 <span>  siteVar <span class="op">=</span> <span class="st">"site"</span>,</span>
 <span>  responseVar <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>  groupVar <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  logTransform <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  logAdd <span class="op">=</span> <span class="fl">0</span></span>
+<span>  typeTransform <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  addValue <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,19 +76,26 @@ optionally log-transform the response variable to estimate these on the log scal
 <dd><p>Optional character vector of grouping variables to summarize by</p></dd>
 
 
-<dt id="arg-logtransform">logTransform<a class="anchor" aria-label="anchor" href="#arg-logtransform"></a></dt>
-<dd><p>Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale</p></dd>
+<dt id="arg-addvalue">addValue<a class="anchor" aria-label="anchor" href="#arg-addvalue"></a></dt>
+<dd><p>Value to add to response variable before transforming (default 0)</p></dd>
 
 
-<dt id="arg-logadd">logAdd<a class="anchor" aria-label="anchor" href="#arg-logadd"></a></dt>
-<dd><p>Value to add to response variable before log-transforming to avoid issues with zeros (default 0)</p></dd>
+<dt id="arg-typetansform">typeTansform<a class="anchor" aria-label="anchor" href="#arg-typetansform"></a></dt>
+<dd><p>Character indicating transformation the response variable, "none","log", or "sqrt" (default "none")"</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame containing the estimated within-site and between-site standard deviations,
-the number of sites and before samples per site, and mean proportion positive by site,
-summarized by group when groupVar is provided.</p>
+    <p>A data frame containing the estimated mean and standard deviation of the
+response variable across all sites and data points (grand_mean,grand_sd), and the
+within and across site standard deviations (sd_within,
+sd_between) in the original scale, and optionally the log or sqrt transformed
+scale if typeTransform is "log" or "sqrt", with an added constant if
+provide d(addValue). The number of sites in the baseline is provided (nB), or, if
+the number of samples per site is not consistent, the number of complete
+and the number of sites with fewer samples (nb_complete and nB_incomplete).
+The proportion of positive values in the response variable is also calculated (prop_positive) to help assess whether a log transformation is appropriate.
+If groupVar is provided, these statistics are calculated separately for each group defined by groupVar.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -348,50 +348,146 @@ power_for_nA_analytical <- function(nA, S, nB, delta, sd_within, sd_delta, alpha
 #' @param siteVar Name of the site variable in baseline data
 #' @param responseVar Name of the response variable in baseline data
 #' @param groupVar Optional character vector of grouping variables to summarize by
-#' @param logTransform Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale
-#' @param logAdd Value to add to response variable before log-transforming to avoid issues with zeros (default 0)
+#' @param typeTansform Character indicating transformation the response variable, "none","log", or "sqrt" (default "none")"
+#' @param addValue Value to add to response variable before transforming (default 0)
 #'
-#' @returns A data frame containing the estimated within-site and between-site standard deviations,
-#'   the number of sites and before samples per site, and mean proportion positive by site,
-#'   summarized by group when groupVar is provided.
+#' @returns A data frame containing the estimated mean and standard deviation of the
+#' response variable across all sites and data points (grand_mean,grand_sd), and the
+#' within and across site standard deviations (sd_within,
+#' sd_between) in the original scale, and optionally the log or sqrt transformed
+#' scale if typeTransform is "log" or "sqrt", with an added constant if
+#' provide d(addValue). The number of sites in the baseline is provided (nB), or, if
+#' the number of samples per site is not consistent, the number of complete
+#' and the number of sites with fewer samples (nb_complete and nB_incomplete).
+#' The proportion of positive values in the response variable is also calculated (prop_positive) to help assess whether a log transformation is appropriate.
+#' If groupVar is provided, these statistics are calculated separately for each group defined by groupVar.
+#'
 #' @export
 #'
 summarize_baseline <- function(baseline,
                                siteVar = "site",
                                responseVar = "y",
                                groupVar = NULL,
-                               logTransform = FALSE,
-                               logAdd = 0) {
+                               typeTransform = "none",
+                               addValue = 0) {
   group_syms <- if (is.null(groupVar)) character(0) else groupVar
-
+  if(typeTransform == "log"){
+    logTransform <- TRUE
+    sqrtTransform <- FALSE
+  } else if (typeTransform == "sqrt"){
+    logTransform <- FALSE
+    sqrtTransform <- TRUE
+  } else {
+    logTransform <- FALSE
+    sqrtTransform <- FALSE
+  }
   returnVal <- baseline %>%
+    group_by(across(all_of(c(group_syms)))) %>%
+    mutate(grand_mean=mean(!!sym(responseVar)),
+           grand_sd=sd(!!sym(responseVar)),
+           grand_logmean=if_else(logTransform, mean(log(!!sym(responseVar) + addValue)), NA_real_),
+           grand_logsd=if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
+           grand_sqrtmean=if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+           grand_sqrtsd=if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_)
+           ) %>%
     group_by(across(all_of(c(group_syms, siteVar)))) %>%
     summarize(
+      grand_mean = unique(grand_mean),
+      grand_sd = unique(grand_sd),
+      grand_logmean = unique(grand_logmean),
+      grand_logsd = unique(grand_logsd),
+      grand_sqrtmean = unique(grand_sqrtmean),
+      grand_sqrtsd = unique(grand_sqrtsd),
       site_mean = mean(!!sym(responseVar)),
       site_sd = sd(!!sym(responseVar)),
-      site_logmean = if_else(logTransform, mean(log(!!sym(responseVar) + logAdd)), NA_real_),
-      site_logsd = if_else(logTransform, sd(log(!!sym(responseVar) + logAdd)), NA_real_),
+      site_logmean = if_else(logTransform, mean(log(!!sym(responseVar) + addValue)), NA_real_),
+      site_logsd = if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
+      site_sqrtmean = if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+      site_sqrtsd = if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_),
       prop_positive_site = mean(!!sym(responseVar) > 0),
       n = n(),
       .groups = "drop"
     ) %>%
     group_by(across(all_of(group_syms))) %>%
     summarize(
+      grand_mean = unique(grand_mean),
+      grand_sd = unique(grand_sd),
+      grand_logmean = unique(grand_logmean),
+      grand_logsd = unique(grand_logsd),
+      grand_sqrtmean = unique(grand_sqrtmean),
+      grand_sqrtsd = unique(grand_sqrtsd),
       sd_within = mean(site_sd),
       sd_between = sd(site_mean),
       logsd_within = if_else(logTransform, mean(site_logsd), NA_real_),
       logsd_between = if_else(logTransform, sd(site_logmean), NA_real_),
+      sqrtsd_within = if_else(sqrtTransform, mean(site_sqrtsd), NA_real_),
+      sqrtsd_between = if_else(sqrtTransform, sd(site_sqrtmean), NA_real_),
       prop_positive = mean(prop_positive_site),
       n_sites = n(),
       nB = if_else(length(unique(n)) == 1, unique(n)[1], NA_real_),
+      nB_complete= if_else(length(unique(n)) >1 ,min(n), NA_real_),
+      nB_incomplete = if_else(length(unique(n))>1 ,max(n) - min(n), NA_real_),
       .groups = "drop"
-    )
+    )%>%
+    select(where(~ any(!is.na(.))))
 
   if (any(is.na(returnVal$nB))) {
     warning("Number of before samples per site is not consistent across sites. nB is set to NA.")
   }
   return(returnVal)
 }
+
+
+#' find_desired_change
+#'
+#' Function to convert a desired change in the original response variable, specified
+#' as either an absolute change or a percent change, to the corresponding change
+#' on the scale of the response variable (e.g. log or sqrt) if a transformation is
+#' specified, using the baseline mean to convert percent changes to absolute
+#' changes on the original scale before applying the transformation.
+#'
+#' @param change_type Character indicating whether the desired change is specified
+#' as an "absolute" change or a "percent" change in the original response variable.
+#' @param change_value Numeric value of the desired change in the original response.
+#' For example, if change_type is "percent", a value of 30 means a desired change
+#' of 30% (i.e. multiply original mean by 1.3).
+#' @param baseline_mean Mean of the original response variable before the change
+#' @param typeTransform Character indicating the transformation to apply to the response
+#'  variable, one of "none", "log", or "sqrt" (default "none").
+#' @param addValue Value to add to response variable before transforming (default 0).
+#'
+#' @export
+#'
+find_desired_change <- function(change_type,
+                                change_value,
+                                baseline_mean,
+                                typeTransform = c("none", "log", "sqrt"),
+                                addValue = 0) {
+  typeTransform <- match.arg(typeTransform)
+  # convert percent change to absolute change on original scale
+  if (change_type == "percent") {
+    abs_change <- baseline_mean * (change_value / 100)
+  } else if (change_type == "absolute") {
+    abs_change <- change_value
+  } else {
+    stop("change_type must be either 'absolute' or 'percent'.")
+  }
+  # baseline and changed value on original scale
+  baseline <- baseline_mean
+  changed <- baseline_mean + abs_change
+  # apply transformation (with addValue shift)
+  transform_fun <- switch(
+    typeTransform,
+    none = function(x) x,
+    log  = function(x) log(x),
+    sqrt = function(x) sqrt(x)
+  )
+  baseline_t <- transform_fun(baseline + addValue)
+  changed_t  <- transform_fun(changed + addValue)
+  # change on transformed scale
+  changed_t - baseline_t
+}
+
 
 #' find_min_detectable_percent
 #'
@@ -403,7 +499,7 @@ summarize_baseline <- function(baseline,
 #' @param sd_within Within-site standard deviation (log calculated if logTransform=TRUE)
 #' @param sd_delta Between-site SD of true changes (default 0)
 #' @param logTransform Logical indicating whether to calculate the detectable change on the log scale (default FALSE)
-#' @param logAdd Value to add to response variable before log-transforming to avoid issues
+#' @param addValue Value to add to response variable before log-transforming to avoid issues
 #' @param baseline_mean Mean of the original response variable before the change.
 #'   Required when logTransform=TRUE to convert percent change back to original scale.
 #' @param target_power Desired power (default 0.8)
@@ -417,7 +513,7 @@ find_min_detectable_percent <- function(S,
                                         sd_within = NA,
                                         sd_delta = 0,
                                         logTransform = FALSE,
-                                        logAdd = 0,
+                                        addValue = 0,
                                         baseline_mean = NULL,
                                         target_power = 0.8,
                                         alpha = 0.05) {
@@ -449,7 +545,7 @@ find_min_detectable_percent <- function(S,
 
   if (logTransform) {
     before <- baseline_mean
-    after <- exp(delta_required) * (baseline_mean + logAdd) - logAdd
+    after <- exp(delta_required) * (baseline_mean + addValue) - addValue
     percent_change <- ((after - before) / before) * 100
   } else {
     percent_change <- delta_required * 100
@@ -471,8 +567,8 @@ find_min_detectable_percent <- function(S,
 #' @param sd_within Standard deviation within sites (log calculated if logTransform=TRUE)
 #' @param sd_delta Standard deviation of true changes among sites
 #' @param alpha Significance level
-#' @param logTransform Logical indicating whether to work on log(y + logAdd) scale (default FALSE)
-#' @param logAdd Value to add to response variable before log-transforming to avoid issues
+#' @param logTransform Logical indicating whether to work on log(y + addValue) scale (default FALSE)
+#' @param addValue Value to add to response variable before log-transforming to avoid issues
 #'
 #' @returns Power for the given percent change
 #' @export
@@ -486,7 +582,7 @@ power_for_percent_change <- function(percent_change,
                                      sd_delta,
                                      alpha,
                                      logTransform = FALSE,
-                                     logAdd = 0) {
+                                     addValue = 0) {
   if (is.null(baseline_mean)) {
     stop("baseline_mean must be provided.")
   }
@@ -497,7 +593,7 @@ power_for_percent_change <- function(percent_change,
   if (logTransform) {
     before <- baseline_mean
     after <- baseline_mean * (1 + percent_change / 100)
-    delta <- log(after + logAdd) - log(before + logAdd)
+    delta <- log(after + addValue) - log(before + addValue)
   } else {
     delta <- baseline_mean * (percent_change / 100)
   }

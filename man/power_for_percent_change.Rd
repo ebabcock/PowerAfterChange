@@ -14,7 +14,7 @@ power_for_percent_change(
   sd_delta,
   alpha,
   logTransform = FALSE,
-  logAdd = 0
+  addValue = 0
 )
 }
 \arguments{
@@ -34,9 +34,9 @@ power_for_percent_change(
 
 \item{alpha}{Significance level}
 
-\item{logTransform}{Logical indicating whether to work on log(y + logAdd) scale (default FALSE)}
+\item{logTransform}{Logical indicating whether to work on log(y + addValue) scale (default FALSE)}
 
-\item{logAdd}{Value to add to response variable before log-transforming to avoid issues}
+\item{addValue}{Value to add to response variable before log-transforming to avoid issues}
 }
 \value{
 Power for the given percent change

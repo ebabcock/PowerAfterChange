@@ -1,4 +1,4 @@
-# Two-sample t-test power analysis (ignoring within-site correlation)
+# Two-sample t-test power analysis
 
 ## Overview
 
@@ -67,7 +67,7 @@ sd_delta     <- 0.5  # site-to-site variability in true changes
 sites_2samp <- find_min_sites_2samp(
   nB = nB_demo, nA = 5,
   delta = delta_target,
-  sd_w  = sd_total,
+  sd_pooled  = sd_total,
   target_power = 0.8, alpha = 0.05,
   S_grid = 2:50
 )
@@ -217,7 +217,7 @@ nA_check <- c(2, 5, 10, 20)
 sim_power <- sapply(nA_check, function(nA) {
   power_for_n_after_2samp(
     S = S_demo, nB = nB_demo, nA = nA,
-    delta = delta_target, sd_w = sd_total, sd_d = 0,
+    delta = delta_target, sd_pooled = sd_total, sd_d = 0,
     alpha = 0.05, nsim = 2000, seed = 42
   )
 })

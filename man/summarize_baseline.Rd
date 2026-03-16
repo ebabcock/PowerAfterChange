@@ -9,8 +9,8 @@ summarize_baseline(
   siteVar = "site",
   responseVar = "y",
   groupVar = NULL,
-  logTransform = FALSE,
-  logAdd = 0
+  typeTransform = "none",
+  addValue = 0
 )
 }
 \arguments{
@@ -22,14 +22,21 @@ summarize_baseline(
 
 \item{groupVar}{Optional character vector of grouping variables to summarize by}
 
-\item{logTransform}{Logical indicating whether to log-transform the response variable for estimating standard deviations on the log scale}
+\item{addValue}{Value to add to response variable before transforming (default 0)}
 
-\item{logAdd}{Value to add to response variable before log-transforming to avoid issues with zeros (default 0)}
+\item{typeTansform}{Character indicating transformation the response variable, "none","log", or "sqrt" (default "none")"}
 }
 \value{
-A data frame containing the estimated within-site and between-site standard deviations,
-the number of sites and before samples per site, and mean proportion positive by site,
-summarized by group when groupVar is provided.
+A data frame containing the estimated mean and standard deviation of the
+response variable across all sites and data points (grand_mean,grand_sd), and the
+within and across site standard deviations (sd_within,
+sd_between) in the original scale, and optionally the log or sqrt transformed
+scale if typeTransform is "log" or "sqrt", with an added constant if
+provide d(addValue). The number of sites in the baseline is provided (nB), or, if
+the number of samples per site is not consistent, the number of complete
+and the number of sites with fewer samples (nb_complete and nB_incomplete).
+The proportion of positive values in the response variable is also calculated (prop_positive) to help assess whether a log transformation is appropriate.
+If groupVar is provided, these statistics are calculated separately for each group defined by groupVar.
 }
 \description{
 Summarize baseline data to estimate within-site and between-site standard deviations, and

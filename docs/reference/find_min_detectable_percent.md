@@ -13,7 +13,7 @@ find_min_detectable_percent(
   sd_within = NA,
   sd_delta = 0,
   logTransform = FALSE,
-  logAdd = 0,
+  addValue = 0,
   baseline_mean = NULL,
   target_power = 0.8,
   alpha = 0.05
@@ -47,7 +47,7 @@ find_min_detectable_percent(
   Logical indicating whether to calculate the detectable change on the
   log scale (default FALSE)
 
-- logAdd:
+- addValue:
 
   Value to add to response variable before log-transforming to avoid
   issues
