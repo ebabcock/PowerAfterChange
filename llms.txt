@@ -26,6 +26,8 @@ simulated data example.
 
 ## All functions
 
+- [`find_desired_change()`](https://ebabcock.github.io/PowerAfterChange/reference/find_desired_change.md)
+  : find_desired_change
 - [`find_min_detectable_percent()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_detectable_percent.md)
   : find_min_detectable_percent
 - [`find_min_detectable_percent_2samp()`](https://ebabcock.github.io/PowerAfterChange/reference/find_min_detectable_percent_2samp.md)

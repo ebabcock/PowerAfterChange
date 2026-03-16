@@ -64,8 +64,6 @@ ggplot(normal_plot_df, aes(x = n_after, y = power, color = method)) +
   theme(legend.position = "bottom")
 ```
 
-![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-3-1.png)
-
 ## Negative binomial tests (log-additive change)
 
 ``` r
@@ -111,8 +109,6 @@ ggplot(nb_plot_df, aes(x = n_after, y = power, color = method)) +
   ) +
   theme(legend.position = "bottom")
 ```
-
-![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-4-1.png)
 
 ## Binomial tests (logit-additive change)
 
@@ -172,8 +168,6 @@ ggplot(bin_plot_df, aes(x = n_after, y = power, color = method)) +
   theme(legend.position = "bottom")
 ```
 
-![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-5-1.png)
-
 ## Sanity checks for `power_for_sites`
 
 ``` r
@@ -194,8 +188,6 @@ ggplot(site_res_normal$curve, aes(x = S, y = power)) +
        x = "Number of Sites",
        y = "Power")
 ```
-
-![](NonNormalDistributionsAndTests_files/figure-html/unnamed-chunk-6-1.png)
 
 ## Conclusion
 

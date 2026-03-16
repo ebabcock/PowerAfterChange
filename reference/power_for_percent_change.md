@@ -17,7 +17,7 @@ power_for_percent_change(
   sd_delta,
   alpha,
   logTransform = FALSE,
-  logAdd = 0
+  addValue = 0
 )
 ```
 
@@ -57,10 +57,10 @@ power_for_percent_change(
 
 - logTransform:
 
-  Logical indicating whether to work on log(y + logAdd) scale (default
+  Logical indicating whether to work on log(y + addValue) scale (default
   FALSE)
 
-- logAdd:
+- addValue:
 
   Value to add to response variable before log-transforming to avoid
   issues
