@@ -45,7 +45,7 @@ power_for_percent_change(
 
 - sd_within:
 
-  Standard deviation within sites (log calculated if logTransform=TRUE)
+  Standard deviation within sites (in transformed scale)
 
 - sd_delta:
 
