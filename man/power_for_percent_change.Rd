@@ -28,7 +28,7 @@ power_for_percent_change(
 
 \item{nB}{Number of before samples per site}
 
-\item{sd_within}{Standard deviation within sites (log calculated if logTransform=TRUE)}
+\item{sd_within}{Standard deviation within sites (in transformed scale)}
 
 \item{sd_delta}{Standard deviation of true changes among sites}
 
