@@ -277,7 +277,7 @@ min_detectable_pct <- find_min_detectable_percent(
   nA = 5,
   sd_within = sd_within_hat,
   sd_delta = sd_delta,
-  logTransform = FALSE,
+  typeTransform = "none",
   target_power = 0.8,
   alpha = 0.05
 )
@@ -298,7 +298,7 @@ detectable_df <- data.frame(
       nA = nA,
       sd_within = sd_within_hat,
       sd_delta = sd_delta,
-      logTransform = FALSE,
+      typeTransform = "none",
       target_power = 0.8,
       alpha = 0.05
     )
@@ -328,7 +328,7 @@ inputGrid$power <- mapply(function(nA, pct) {
     sd_within = sd_within_hat,
     sd_delta = sd_delta,
     baseline_mean = before_mean,
-    logTransform = FALSE,
+    typeTransform =  "none",
     percent_change = pct,
     alpha = 0.05
   )}, inputGrid$nA, inputGrid$percent_change)

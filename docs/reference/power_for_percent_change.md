@@ -16,7 +16,7 @@ power_for_percent_change(
   sd_within,
   sd_delta,
   alpha,
-  logTransform = FALSE,
+  typeTransform = c("none", "log", "sqrt"),
   addValue = 0
 )
 ```
@@ -55,15 +55,14 @@ power_for_percent_change(
 
   Significance level
 
-- logTransform:
+- typeTransform:
 
-  Logical indicating whether to work on log(y + addValue) scale (default
-  FALSE)
+  Character indicating the transformation to apply to the response
+  variable, one of "none", "log", or "sqrt" (default "none").
 
 - addValue:
 
-  Value to add to response variable before log-transforming to avoid
-  issues
+  Value to add to response variable before transforming to avoid issues
 
 ## Value
 

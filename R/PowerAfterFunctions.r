@@ -498,10 +498,11 @@ find_desired_change <- function(change_type,
 #' @param nA Number of after measurements per site
 #' @param sd_within Within-site standard deviation (log calculated if logTransform=TRUE)
 #' @param sd_delta Between-site SD of true changes (default 0)
-#' @param logTransform Logical indicating whether to calculate the detectable change on the log scale (default FALSE)
-#' @param addValue Value to add to response variable before log-transforming to avoid issues
+#' @param typeTransform Character indicating the transformation to apply to the response
+#'  variable, one of "none", "log", or "sqrt" (default "none").
+#' @param addValue Value to add to response variable before transforming to avoid issues
 #' @param baseline_mean Mean of the original response variable before the change.
-#'   Required when logTransform=TRUE to convert percent change back to original scale.
+#'   Required when typeTransform is "log" or "sqrt" to convert percent change back to original scale.
 #' @param target_power Desired power (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #'
@@ -512,17 +513,22 @@ find_min_detectable_percent <- function(S,
                                         nA,
                                         sd_within = NA,
                                         sd_delta = 0,
-                                        logTransform = FALSE,
+                                        typeTransform = c("none", "log", "sqrt"),
                                         addValue = 0,
                                         baseline_mean = NULL,
                                         target_power = 0.8,
                                         alpha = 0.05) {
 
-  if (logTransform && is.null(baseline_mean)) {
-    stop("baseline_mean must be provided when logTransform = TRUE.")
+  typeTransform <- match.arg(typeTransform)
+
+  if (typeTransform %in% c("log", "sqrt") && is.null(baseline_mean)) {
+    stop("baseline_mean must be provided when typeTransform is 'log' or 'sqrt'.")
   }
-  if (logTransform && baseline_mean <= 0) {
-    stop("baseline_mean must be > 0 when logTransform = TRUE.")
+  if (typeTransform == "log" && baseline_mean + addValue <= 0) {
+    stop("baseline_mean + addValue must be > 0 when typeTransform is 'log'.")
+  }
+  if (typeTransform == "sqrt" && baseline_mean + addValue < 0) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
 
   power_root_func <- function(delta) {
@@ -543,12 +549,27 @@ find_min_detectable_percent <- function(S,
   fit <- uniroot(power_root_func, interval = c(1e-4, 5))
   delta_required <- fit$root
 
-  if (logTransform) {
-    before <- baseline_mean
-    after <- exp(delta_required) * (baseline_mean + addValue) - addValue
-    percent_change <- ((after - before) / before) * 100
-  } else {
+  if (typeTransform == "none") {
     percent_change <- delta_required * 100
+  } else {
+    transform_fun <- switch(
+      typeTransform,
+      log  = function(x) log(x),
+      sqrt = function(x) sqrt(x)
+    )
+    inv_transform_fun <- switch(
+      typeTransform,
+      log  = function(x) exp(x),
+      sqrt = function(x) x^2
+    )
+
+    baseline_t <- transform_fun(baseline_mean + addValue)
+    changed_t  <- baseline_t + delta_required
+
+    before <- baseline_mean
+    after  <- inv_transform_fun(changed_t) - addValue
+
+    percent_change <- ((after - before) / before) * 100
   }
 
   return(percent_change)
@@ -564,38 +585,50 @@ find_min_detectable_percent <- function(S,
 #' @param nA Number of after samples per site
 #' @param S Number of sites
 #' @param nB Number of before samples per site
-#' @param sd_within Standard deviation within sites (log calculated if logTransform=TRUE)
+#' @param sd_within Standard deviation within sites (in transformed scale)
 #' @param sd_delta Standard deviation of true changes among sites
 #' @param alpha Significance level
-#' @param logTransform Logical indicating whether to work on log(y + addValue) scale (default FALSE)
-#' @param addValue Value to add to response variable before log-transforming to avoid issues
+#' @param typeTransform Character indicating the transformation to apply to the response
+#'  variable, one of "none", "log", or "sqrt" (default "none").
+#' @param addValue Value to add to response variable before transforming to avoid issues
 #'
 #' @returns Power for the given percent change
 #' @export
 #'
 power_for_percent_change <- function(percent_change,
-                                     baseline_mean=NULL,
+                                     baseline_mean = NULL,
                                      nA,
                                      S,
                                      nB,
                                      sd_within,
                                      sd_delta,
                                      alpha,
-                                     logTransform = FALSE,
+                                     typeTransform = c("none", "log", "sqrt"),
                                      addValue = 0) {
+  typeTransform <- match.arg(typeTransform)
+
   if (is.null(baseline_mean)) {
     stop("baseline_mean must be provided.")
   }
-  if (baseline_mean <= 0) {
-    stop("baseline_mean must be > 0.")
+  if (typeTransform == "log" && baseline_mean + addValue <= 0) {
+    stop("baseline_mean + addValue must be > 0 when typeTransform is 'log'.")
+  }
+  if (typeTransform == "sqrt" && baseline_mean + addValue < 0) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
 
-  if (logTransform) {
-    before <- baseline_mean
-    after <- baseline_mean * (1 + percent_change / 100)
-    delta <- log(after + addValue) - log(before + addValue)
+  before <- baseline_mean
+  after <- baseline_mean * (1 + percent_change / 100)
+
+  if (typeTransform == "none") {
+    delta <- after - before
   } else {
-    delta <- baseline_mean * (percent_change / 100)
+    transform_fun <- switch(
+      typeTransform,
+      log  = function(x) log(x),
+      sqrt = function(x) sqrt(x)
+    )
+    delta <- transform_fun(after + addValue) - transform_fun(before + addValue)
   }
 
   sd_diff <- getSD_difference(sd_within, nA, nB, sd_delta)

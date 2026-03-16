@@ -10,10 +10,12 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval=FALSE)
+knitr::opts_chunk$set(eval=TRUE)
 ```
 
 ## Overview
+
+This is a work in progress, the functions are not final.
 
 The functions in this vignette calculate power and sample size for a
 **two-sample (unpaired) t-test** that compares all before observations pooled
@@ -205,9 +207,9 @@ ggplot(comparison_df, aes(x = n_after, y = power, color = Method)) +
   theme(legend.position = "bottom")
 ```
 
-The paired design is more efficient here: it typically reaches target power
+The paired design should more efficient here: it typically reaches target power
 with fewer after samples because it eliminates between-site baseline
-variability as a source of error.
+variability as a source of error. Still working on why it isn't.
 
 ---
 

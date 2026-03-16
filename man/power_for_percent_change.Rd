@@ -13,7 +13,7 @@ power_for_percent_change(
   sd_within,
   sd_delta,
   alpha,
-  logTransform = FALSE,
+  typeTransform = c("none", "log", "sqrt"),
   addValue = 0
 )
 }
@@ -34,9 +34,10 @@ power_for_percent_change(
 
 \item{alpha}{Significance level}
 
-\item{logTransform}{Logical indicating whether to work on log(y + addValue) scale (default FALSE)}
+\item{typeTransform}{Character indicating the transformation to apply to the response
+variable, one of "none", "log", or "sqrt" (default "none").}
 
-\item{addValue}{Value to add to response variable before log-transforming to avoid issues}
+\item{addValue}{Value to add to response variable before transforming to avoid issues}
 }
 \value{
 Power for the given percent change

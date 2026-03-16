@@ -10,7 +10,7 @@ find_min_detectable_percent(
   nA,
   sd_within = NA,
   sd_delta = 0,
-  logTransform = FALSE,
+  typeTransform = c("none", "log", "sqrt"),
   addValue = 0,
   baseline_mean = NULL,
   target_power = 0.8,
@@ -28,12 +28,13 @@ find_min_detectable_percent(
 
 \item{sd_delta}{Between-site SD of true changes (default 0)}
 
-\item{logTransform}{Logical indicating whether to calculate the detectable change on the log scale (default FALSE)}
+\item{typeTransform}{Character indicating the transformation to apply to the response
+variable, one of "none", "log", or "sqrt" (default "none").}
 
-\item{addValue}{Value to add to response variable before log-transforming to avoid issues}
+\item{addValue}{Value to add to response variable before transforming to avoid issues}
 
 \item{baseline_mean}{Mean of the original response variable before the change.
-Required when logTransform=TRUE to convert percent change back to original scale.}
+Required when typeTransform is "log" or "sqrt" to convert percent change back to original scale.}
 
 \item{target_power}{Desired power (default 0.8)}
 
