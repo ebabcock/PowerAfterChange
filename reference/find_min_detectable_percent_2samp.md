@@ -14,7 +14,8 @@ find_min_detectable_percent_2samp(
   sd_pooled,
   baseline_mean,
   target_power = 0.8,
-  alpha = 0.05
+  alpha = 0.05,
+  typeTransform = "arcsin"
 )
 ```
 
