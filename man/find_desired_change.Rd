@@ -8,7 +8,7 @@ find_desired_change(
   change_type,
   change_value,
   baseline_mean,
-  typeTransform = c("none", "log", "sqrt"),
+  typeTransform = c("none", "log", "sqrt", "arcsin"),
   addValue = 0
 )
 }

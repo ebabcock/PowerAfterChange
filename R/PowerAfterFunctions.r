@@ -375,7 +375,7 @@ summarize_baseline <- function(baseline,
   # Set flags based on typeTransform
   logTransform   <- typeTransform == "log"
   sqrtTransform  <- typeTransform == "sqrt"
-  asinTransform  <- typeTransform == "arcsin" # New flag
+  asinTransform  <- typeTransform == "arcsin"
 
   returnVal <- baseline %>%
     group_by(across(all_of(c(group_syms)))) %>%
