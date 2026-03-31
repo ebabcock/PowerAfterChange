@@ -39,6 +39,23 @@ base_summary <- summarize_baseline(
 )
 ```
 
+    ## Warning: There were 2 warnings in `mutate()`.
+    ## The first warning was:
+    ## ℹ In argument: `grand_asinmean = if_else(asinTransform, mean(asin(sqrt(y))),
+    ##   NA_real_)`.
+    ## Caused by warning in `asin()`:
+    ## ! NaNs produced
+    ## ℹ Run `dplyr::last_dplyr_warnings()` to see the 1 remaining warning.
+
+    ## Warning: There were 24 warnings in `summarize()`.
+    ## The first warning was:
+    ## ℹ In argument: `site_asinmean = if_else(asinTransform, mean(asin(sqrt(y))),
+    ##   NA_real_)`.
+    ## ℹ In group 1: `site = 1`.
+    ## Caused by warning in `asin()`:
+    ## ! NaNs produced
+    ## ℹ Run `dplyr::last_dplyr_warnings()` to see the 23 remaining warnings.
+
 Extract inputs
 
 ``` r

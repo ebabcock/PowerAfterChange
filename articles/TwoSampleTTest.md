@@ -128,10 +128,15 @@ min_pct_2samp <- find_min_detectable_percent_2samp(
   baseline_mean = before_mean,
   target_power = 0.8, alpha = 0.05
 )
+```
+
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+
+``` r
 min_pct_2samp
 ```
 
-    ## [1] 9.813063
+    ## [1] NaN
 
 How does the minimum detectable percent change vary with the number of
 after samples?
@@ -149,7 +154,50 @@ detectable_2samp_df <- data.frame(
     )
   })
 )
+```
 
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
+
+``` r
 ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
   geom_line() +
   geom_hline(yintercept = min_pct_2samp, linetype = "dashed", color = "red") +
@@ -159,6 +207,12 @@ ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
     y = "Minimum Detectable Percent Change"
   )
 ```
+
+    ## Warning: Removed 40 rows containing missing values or values outside the scale range
+    ## (`geom_line()`).
+
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_hline()`).
 
 ![](TwoSampleTTest_files/figure-html/unnamed-chunk-10-1.png)
 

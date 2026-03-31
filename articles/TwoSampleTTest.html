@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Beth
 Babcock</h4>
             
-            <h4 data-toc-skip class="date">2026-03-16</h4>
+            <h4 data-toc-skip class="date">2026-03-31</h4>
       
 
       <div class="d-none name"><code>TwoSampleTTest.Rmd</code></div>
@@ -190,12 +190,14 @@ minimum detectable percent change</li>
 <span>  sd_pooled <span class="op">=</span> <span class="va">sd_total</span>,</span>
 <span>  baseline_mean <span class="op">=</span> <span class="va">before_mean</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">min_pct_2samp</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 9.813063</span></span></code></pre>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span></code></pre>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">min_pct_2samp</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] NaN</span></span></code></pre>
 <p>How does the minimum detectable percent change vary with the number
 of after samples?</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span><span class="va">detectable_2samp_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  n_after <span class="op">=</span> <span class="va">nA_grid</span>,</span>
@@ -207,9 +209,49 @@ of after samples?</p>
 <span>      target_power <span class="op">=</span> <span class="fl">0.8</span>, alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">detectable_2samp_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_after</span>, y <span class="op">=</span> <span class="va">min_detectable_percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span>
+<span><span class="co">## Warning in asin(sqrt(baseline_mean)): NaNs produced</span></span></code></pre>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">detectable_2samp_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_after</span>, y <span class="op">=</span> <span class="va">min_detectable_percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">min_pct_2samp</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
@@ -217,6 +259,10 @@ of after samples?</p>
 <span>    x <span class="op">=</span> <span class="st">"Number of After Samples per Site"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Minimum Detectable Percent Change"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 40 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_line()`).</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_hline()`).</span></span></code></pre>
 <p><img src="TwoSampleTTest_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 <hr>
 </div>
@@ -229,7 +275,7 @@ t-test</strong> (<code>power_for_nA_analytical</code>) against the
 the same design parameters. The paired design accounts for between-site
 variability in changes (<code>sd_d</code>), while the two-sample design
 ignores site structure entirely.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nA_grid</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
 <span></span>
 <span><span class="co"># Paired analytical power (includes sd_delta for between-site change variability)</span></span>
@@ -282,7 +328,7 @@ isn’t.</p>
 comparing them to simulation-based estimates from
 <code>power_for_n_after_2samp</code> for a few values of
 <code>nA</code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nA_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sim_power</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nA_check</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nA</span><span class="op">)</span> <span class="op">{</span></span>
