@@ -371,68 +371,64 @@ summarize_baseline <- function(baseline,
                                typeTransform = "none",
                                addValue = 0) {
   group_syms <- if (is.null(groupVar)) character(0) else groupVar
-  if(typeTransform == "log"){
-    logTransform <- TRUE
-    sqrtTransform <- FALSE
-  } else if (typeTransform == "sqrt"){
-    logTransform <- FALSE
-    sqrtTransform <- TRUE
-  } else {
-    logTransform <- FALSE
-    sqrtTransform <- FALSE
-  }
+
+  # Set flags based on typeTransform
+  logTransform   <- typeTransform == "log"
+  sqrtTransform  <- typeTransform == "sqrt"
+  asinTransform  <- typeTransform == "arcsin" # New flag
+
   returnVal <- baseline %>%
     group_by(across(all_of(c(group_syms)))) %>%
-    mutate(grand_mean=mean(!!sym(responseVar)),
-           grand_sd=sd(!!sym(responseVar)),
-           grand_logmean=if_else(logTransform, mean(log(!!sym(responseVar) + addValue)), NA_real_),
-           grand_logsd=if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
-           grand_sqrtmean=if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
-           grand_sqrtsd=if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_)
-           ) %>%
+    mutate(
+      grand_mean      = mean(!!sym(responseVar)),
+      grand_sd        = sd(!!sym(responseVar)),
+      grand_logmean   = if_else(logTransform, mean(log(!!sym(responseVar) + addValue)), NA_real_),
+      grand_logsd     = if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
+      grand_sqrtmean  = if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+      grand_sqrtsd    = if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+      # New Arcsin columns
+      grand_asinmean  = if_else(asinTransform, mean(asin(sqrt(!!sym(responseVar)))), NA_real_),
+      grand_asinsd    = if_else(asinTransform, sd(asin(sqrt(!!sym(responseVar)))), NA_real_)
+    ) %>%
     group_by(across(all_of(c(group_syms, siteVar)))) %>%
     summarize(
-      grand_mean = unique(grand_mean),
-      grand_sd = unique(grand_sd),
-      grand_logmean = unique(grand_logmean),
-      grand_logsd = unique(grand_logsd),
-      grand_sqrtmean = unique(grand_sqrtmean),
-      grand_sqrtsd = unique(grand_sqrtsd),
-      site_mean = mean(!!sym(responseVar)),
-      site_sd = sd(!!sym(responseVar)),
-      site_logmean = if_else(logTransform, mean(log(!!sym(responseVar) + addValue)), NA_real_),
-      site_logsd = if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
-      site_sqrtmean = if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
-      site_sqrtsd = if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+      across(starts_with("grand_"), unique),
+      site_mean       = mean(!!sym(responseVar)),
+      site_sd         = sd(!!sym(responseVar)),
+      site_logmean    = if_else(logTransform, mean(log(!!sym(responseVar) + addValue)), NA_real_),
+      site_logsd      = if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
+      site_sqrtmean   = if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+      site_sqrtsd     = if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_),
+      # New Site Arcsin
+      site_asinmean   = if_else(asinTransform, mean(asin(sqrt(!!sym(responseVar)))), NA_real_),
+      site_asinsd     = if_else(asinTransform, sd(asin(sqrt(!!sym(responseVar)))), NA_real_),
       prop_positive_site = mean(!!sym(responseVar) > 0),
       n = n(),
       .groups = "drop"
     ) %>%
     group_by(across(all_of(group_syms))) %>%
     summarize(
-      grand_mean = unique(grand_mean),
-      grand_sd = unique(grand_sd),
-      grand_logmean = unique(grand_logmean),
-      grand_logsd = unique(grand_logsd),
-      grand_sqrtmean = unique(grand_sqrtmean),
-      grand_sqrtsd = unique(grand_sqrtsd),
-      sd_within = mean(site_sd),
-      sd_between = sd(site_mean),
-      logsd_within = if_else(logTransform, mean(site_logsd), NA_real_),
-      logsd_between = if_else(logTransform, sd(site_logmean), NA_real_),
-      sqrtsd_within = if_else(sqrtTransform, mean(site_sqrtsd), NA_real_),
-      sqrtsd_between = if_else(sqrtTransform, sd(site_sqrtmean), NA_real_),
-      prop_positive = mean(prop_positive_site),
-      n_sites = n(),
-      nB = if_else(length(unique(n)) == 1, unique(n)[1], NA_real_),
-      nB_complete= if_else(length(unique(n)) >1 ,min(n), NA_real_),
-      nB_incomplete = if_else(length(unique(n))>1 ,max(n) - min(n), NA_real_),
+      across(starts_with("grand_"), unique),
+      sd_within       = mean(site_sd),
+      sd_between      = sd(site_mean),
+      logsd_within    = if_else(logTransform, mean(site_logsd), NA_real_),
+      logsd_between   = if_else(logTransform, sd(site_logmean), NA_real_),
+      sqrtsd_within   = if_else(sqrtTransform, mean(site_sqrtsd), NA_real_),
+      sqrtsd_between  = if_else(sqrtTransform, sd(site_sqrtmean), NA_real_),
+      # New Arcsin variance components
+      asinsd_within   = if_else(asinTransform, mean(site_asinsd), NA_real_),
+      asinsd_between  = if_else(asinTransform, sd(site_asinmean), NA_real_),
+      prop_positive   = mean(prop_positive_site),
+      n_sites         = n(),
+      nB              = if_else(length(unique(n)) == 1, unique(n)[1], NA_real_),
+      nB_complete     = if_else(length(unique(n)) > 1, min(n), NA_real_),
+      nB_incomplete   = if_else(length(unique(n)) > 1, max(n) - min(n), NA_real_),
       .groups = "drop"
-    )%>%
+    ) %>%
     select(where(~ any(!is.na(.))))
 
   if (any(is.na(returnVal$nB))) {
-    warning("Number of before samples per site is not consistent across sites. nB is set to NA.")
+    warning("Number of before samples per site is not consistent. nB set to NA.")
   }
   return(returnVal)
 }
@@ -461,10 +457,11 @@ summarize_baseline <- function(baseline,
 find_desired_change <- function(change_type,
                                 change_value,
                                 baseline_mean,
-                                typeTransform = c("none", "log", "sqrt"),
+                                typeTransform = c("none", "log", "sqrt", "arcsin"),
                                 addValue = 0) {
   typeTransform <- match.arg(typeTransform)
-  # convert percent change to absolute change on original scale
+
+  # 1. Calculate absolute change on the original (0-1) scale
   if (change_type == "percent") {
     abs_change <- baseline_mean * (change_value / 100)
   } else if (change_type == "absolute") {
@@ -472,21 +469,29 @@ find_desired_change <- function(change_type,
   } else {
     stop("change_type must be either 'absolute' or 'percent'.")
   }
-  # baseline and changed value on original scale
+
   baseline <- baseline_mean
-  changed <- baseline_mean + abs_change
-  # apply transformation (with addValue shift)
+  changed  <- baseline_mean + abs_change
+
+  # 2. Define the transformation functions
+  # Note: Arcsin usually ignores addValue as it must stay within [0,1]
   transform_fun <- switch(
     typeTransform,
-    none = function(x) x,
-    log  = function(x) log(x),
-    sqrt = function(x) sqrt(x)
+    none   = function(x) x,
+    log    = function(x) log(x + addValue),
+    sqrt   = function(x) sqrt(x + addValue),
+    arcsin = function(x) asin(sqrt(x))
   )
-  baseline_t <- transform_fun(baseline + addValue)
-  changed_t  <- transform_fun(changed + addValue)
-  # change on transformed scale
-  changed_t - baseline_t
+
+  # 3. Calculate values on the transformed scale
+  # Handling the + addValue inside the switch/function for consistency
+  baseline_t <- transform_fun(baseline)
+  changed_t  <- transform_fun(changed)
+
+  # 4. Return the difference (Effect Size) on the transformed scale
+  return(changed_t - baseline_t)
 }
+
 
 
 #' find_min_detectable_percent
@@ -719,15 +724,36 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
                                               sd_pooled,
                                               baseline_mean,
                                               target_power = 0.8,
-                                              alpha = 0.05) {
+                                              alpha = 0.05,
+                                              typeTransform = "arcsin") {
   n_before <- S * nB
   n_after  <- S * nA
-  power_root_func <- function(delta) {
-    power_2samp_analytical(n_before, n_after, delta, sd_pooled, alpha) - target_power
+
+  # 1. Find the required delta on the TRANSFORMED scale
+  power_root_func <- function(delta_t) {
+    power_2samp_analytical(n_before, n_after, delta_t, sd_pooled, alpha) - target_power
   }
-  fit <- uniroot(power_root_func, interval = c(1e-6, 1e6))  # wide enough for any realistic delta
-  delta_required <- fit$root
-  (delta_required / baseline_mean) * 100
+
+  fit <- uniroot(power_root_func, interval = c(1e-6, 2)) # Arcsin scale max is ~1.57
+  delta_t_required <- fit$root
+
+  # 2. Back-transform to find the detectable change in original units
+  if (typeTransform == "arcsin") {
+    # Transform baseline to arcsin scale
+    baseline_t <- asin(sqrt(baseline_mean))
+    # Add the required change
+    new_mean_t <- baseline_t + delta_t_required
+    # Back-transform to original proportion scale
+    new_mean <- (sin(new_mean_t))^2
+    # Calculate % change from original baseline
+    detectable_pct <- ((new_mean - baseline_mean) / baseline_mean) * 100
+
+  } else {
+    # Default linear logic for "none"
+    detectable_pct <- (delta_t_required / baseline_mean) * 100
+  }
+
+  return(detectable_pct)
 }
 
 #' find_min_sites_2samp
