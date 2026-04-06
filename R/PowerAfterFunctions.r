@@ -766,7 +766,7 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #' @param nA Number of after measurements per site
 #' @param S_before Number of sites before, if you wish to keep this number
 #' constant in the analysis. Defaults to NULL, which allows the number of sites
-#' before and after to vary in the calculation. If n_sites_before is provided,
+#' before and after to vary in the calculation. If S_before is provided,
 #' the function will calculate power for a fixed number of sites before and varying number of sites after.
 #' @param delta Hypothesized mean change (absolute, on the scale of the response)
 #' @param sd_pooled Standard deviation among all samples
@@ -778,19 +778,19 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #'   (data frame of S and power). If nB and nA are the number of years before
 #'   after, then S_star is the minimum number of sites needed to achieve target
 #'   power with a sample size of  `n_before=nB*S` and `n_before=nA*S` in a 2-sample
-#'   t-test. If n_sites_before is provided, then S_star is the minimum number of
+#'   t-test. If S_before is provided, then S_star is the minimum number of
 #'   sites needed to achieve target power with S_before sites before and
 #'   S_star sites after.
 #' @export
 #'
 find_min_sites_2samp <- function(nB, nA,
-                                 n_sites_before = NULL,
+                                 S_before = NULL,
                                  delta,
                                  sd_pooled,
                                  target_power = 0.8,
                                  alpha = 0.05,
                                  S_grid = 2:50) {
-  if (!is.null(n_sites_before)) {
+  if (!is.null(S_before)) {
    pow <- sapply(S_grid, function(S) {
     power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
    }) } else { #if fixed sites before
@@ -833,9 +833,15 @@ find_n_after_2samp <- function(S,
                                target_power = 0.8,
                                alpha = 0.05,
                                n_grid = 1:50) {
-  pow <- sapply(n_grid, function(nA) {
+  if(is.null(S_before)){
+   pow <- sapply(n_grid, function(nA) {
     power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
   })
+  } else {
+    pow <- sapply(n_grid, function(nA) {
+      power_2samp_analytical(S_before * nB, S * nA, delta, sd_pooled, alpha)
+    })
+  }
   out    <- data.frame(n_after = n_grid, power = pow)
   n_star <- out$n_after[which(out$power >= target_power)[1]]
   list(n_star = n_star, curve = out)
