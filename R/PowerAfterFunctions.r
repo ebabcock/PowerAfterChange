@@ -709,7 +709,10 @@ power_for_n_after_2samp <- function(S, nB, nA,
 #' Calculates the smallest percentage change detectable for a given sample size
 #' using a two-sample (unpaired) t-test that ignores within-site correlation.
 #'
-#' @param S Number of sites
+#' @param S Number of sites both before and after (if S_before is NULL) or
+#' number of sites after (if S_before is provided)
+#' @param S_before Number of sites before, if you wish to keep this number
+#' constant in the analysis. Defaults to NULL, which makes S the same before and after.
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
 #' @param sd_pooled Standard deviation among all data points
@@ -720,13 +723,15 @@ power_for_n_after_2samp <- function(S, nB, nA,
 #'
 #' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
 #' @export
-find_min_detectable_percent_2samp <- function(S, nB, nA,
+find_min_detectable_percent_2samp <- function(S,
+                                              S_before=NULL,
+                                              nB, nA,
                                               sd_pooled,
                                               baseline_mean,
                                               target_power = 0.8,
                                               alpha = 0.05,
                                               typeTransform = "arcsin") {
-  n_before <- S * nB
+  n_before <- if_else(is.null(S_before), S * nB, S_before * nB)
   n_after  <- S * nA
 
   # 1. Find the required delta on the TRANSFORMED scale
@@ -790,7 +795,7 @@ find_min_sites_2samp <- function(nB, nA,
                                  target_power = 0.8,
                                  alpha = 0.05,
                                  S_grid = 2:50) {
-  if (!is.null(S_before)) {
+  if (is.null(S_before)) {
    pow <- sapply(S_grid, function(S) {
     power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
    }) } else { #if fixed sites before
@@ -798,9 +803,6 @@ find_min_sites_2samp <- function(nB, nA,
        power_2samp_analytical(S_before * nB, S * nA, delta, sd_pooled, alpha)
      })
    }
-  pow <- sapply(S_grid, function(S) {
-    power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
-  })
   out    <- data.frame(S = S_grid, power = pow)
   S_star <- out$S[which(out$power >= target_power)[1]]
   list(S_star = S_star, curve = out)
