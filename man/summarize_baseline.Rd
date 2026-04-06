@@ -24,7 +24,7 @@ summarize_baseline(
 
 \item{addValue}{Value to add to response variable before transforming (default 0)}
 
-\item{typeTansform}{Character indicating transformation the response variable, "none","log", or "sqrt" (default "none")"}
+\item{typeTansform}{Character indicating transformation the response variable, "none","log", "sqrt", or "arcsin" for arcsin(sqrt) (default "none")"}
 }
 \value{
 A data frame containing the estimated mean and standard deviation of the

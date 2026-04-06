@@ -348,7 +348,7 @@ power_for_nA_analytical <- function(nA, S, nB, delta, sd_within, sd_delta, alpha
 #' @param siteVar Name of the site variable in baseline data
 #' @param responseVar Name of the response variable in baseline data
 #' @param groupVar Optional character vector of grouping variables to summarize by
-#' @param typeTansform Character indicating transformation the response variable, "none","log", or "sqrt" (default "none")"
+#' @param typeTansform Character indicating transformation the response variable, "none","log", "sqrt", or "arcsin" for arcsin(sqrt) (default "none")"
 #' @param addValue Value to add to response variable before transforming (default 0)
 #'
 #' @returns A data frame containing the estimated mean and standard deviation of the
@@ -764,6 +764,10 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #'
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
+#' @param S_before Number of sites before, if you wish to keep this number
+#' constant in the analysis. Defaults to NULL, which allows the number of sites
+#' before and after to vary in the calculation. If n_sites_before is provided,
+#' the function will calculate power for a fixed number of sites before and varying number of sites after.
 #' @param delta Hypothesized mean change (absolute, on the scale of the response)
 #' @param sd_pooled Standard deviation among all samples
 #' @param target_power Desired power level (default 0.8)
@@ -771,14 +775,29 @@ find_min_detectable_percent_2samp <- function(S, nB, nA,
 #' @param S_grid Grid of site numbers to evaluate (default 2:50)
 #'
 #' @returns A list with `S_star` (minimum sites for target power) and `curve`
-#'   (data frame of S and power)
+#'   (data frame of S and power). If nB and nA are the number of years before
+#'   after, then S_star is the minimum number of sites needed to achieve target
+#'   power with a sample size of  `n_before=nB*S` and `n_before=nA*S` in a 2-sample
+#'   t-test. If n_sites_before is provided, then S_star is the minimum number of
+#'   sites needed to achieve target power with S_before sites before and
+#'   S_star sites after.
 #' @export
 #'
 find_min_sites_2samp <- function(nB, nA,
-                                 delta, sd_pooled,
+                                 n_sites_before = NULL,
+                                 delta,
+                                 sd_pooled,
                                  target_power = 0.8,
                                  alpha = 0.05,
                                  S_grid = 2:50) {
+  if (!is.null(n_sites_before)) {
+   pow <- sapply(S_grid, function(S) {
+    power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
+   }) } else { #if fixed sites before
+     pow <- sapply(S_grid, function(S) {
+       power_2samp_analytical(S_before * nB, S * nA, delta, sd_pooled, alpha)
+     })
+   }
   pow <- sapply(S_grid, function(S) {
     power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
   })
@@ -794,6 +813,8 @@ find_min_sites_2samp <- function(nB, nA,
 #' after measurements, ignoring within-site correlation.
 #'
 #' @param S Number of sites
+#' @param S_before Number of sites before, if you wish to keep this number
+#' constant in the analysis. Defaults to NULL, which keeps S sites before and after.
 #' @param nB Number of before measurements per site
 #' @param delta Hypothesized mean change
 #' @param sd_pooled Standard deviation among all samples
@@ -804,7 +825,9 @@ find_min_sites_2samp <- function(nB, nA,
 #' @returns A list with `n_star` (minimum after measurements for target power)
 #'   and `curve` (data frame of n_after and power)
 #' @export
-find_n_after_2samp <- function(S, nB,
+find_n_after_2samp <- function(S,
+                               S_before=NULL,
+                               nB,
                                delta,
                                sd_pooled,
                                target_power = 0.8,

@@ -6,6 +6,7 @@
 \usage{
 find_n_after_2samp(
   S,
+  S_before = NULL,
   nB,
   delta,
   sd_pooled,
@@ -16,6 +17,9 @@ find_n_after_2samp(
 }
 \arguments{
 \item{S}{Number of sites}
+
+\item{S_before}{Number of sites before, if you wish to keep this number
+constant in the analysis. Defaults to NULL, which keeps S sites before and after.}
 
 \item{nB}{Number of before measurements per site}
 
