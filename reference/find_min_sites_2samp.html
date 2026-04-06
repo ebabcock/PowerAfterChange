@@ -53,7 +53,7 @@ ignoring within-site correlation.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">find_min_sites_2samp</span><span class="op">(</span></span>
 <span>  <span class="va">nB</span>,</span>
 <span>  <span class="va">nA</span>,</span>
-<span>  n_sites_before <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  S_before <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  <span class="va">sd_pooled</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
@@ -72,6 +72,13 @@ ignoring within-site correlation.</p>
 
 <dt id="arg-na">nA<a class="anchor" aria-label="anchor" href="#arg-na"></a></dt>
 <dd><p>Number of after measurements per site</p></dd>
+
+
+<dt id="arg-s-before">S_before<a class="anchor" aria-label="anchor" href="#arg-s-before"></a></dt>
+<dd><p>Number of sites before, if you wish to keep this number
+constant in the analysis. Defaults to NULL, which allows the number of sites
+before and after to vary in the calculation. If S_before is provided,
+the function will calculate power for a fixed number of sites before and varying number of sites after.</p></dd>
 
 
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
@@ -93,13 +100,6 @@ ignoring within-site correlation.</p>
 <dt id="arg-s-grid">S_grid<a class="anchor" aria-label="anchor" href="#arg-s-grid"></a></dt>
 <dd><p>Grid of site numbers to evaluate (default 2:50)</p></dd>
 
-
-<dt id="arg-s-before">S_before<a class="anchor" aria-label="anchor" href="#arg-s-before"></a></dt>
-<dd><p>Number of sites before, if you wish to keep this number
-constant in the analysis. Defaults to NULL, which allows the number of sites
-before and after to vary in the calculation. If n_sites_before is provided,
-the function will calculate power for a fixed number of sites before and varying number of sites after.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -107,7 +107,7 @@ the function will calculate power for a fixed number of sites before and varying
 (data frame of S and power). If nB and nA are the number of years before
 after, then S_star is the minimum number of sites needed to achieve target
 power with a sample size of  <code>n_before=nB*S</code> and <code>n_before=nA*S</code> in a 2-sample
-t-test. If n_sites_before is provided, then S_star is the minimum number of
+t-test. If S_before is provided, then S_star is the minimum number of
 sites needed to achieve target power with S_before sites before and
 S_star sites after.</p>
     </div>
