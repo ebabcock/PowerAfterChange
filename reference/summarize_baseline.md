@@ -42,7 +42,7 @@ summarize_baseline(
 - typeTansform:
 
   Character indicating transformation the response variable,
-  "none","log", or "sqrt" (default "none")"
+  "none","log", "sqrt", or "arcsin" for arcsin(sqrt) (default "none")"
 
 ## Value
 
