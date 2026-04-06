@@ -49,6 +49,7 @@ using a two-sample (unpaired) t-test that ignores within-site correlation.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">find_min_detectable_percent_2samp</span><span class="op">(</span></span>
 <span>  <span class="va">S</span>,</span>
+<span>  S_before <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">nB</span>,</span>
 <span>  <span class="va">nA</span>,</span>
 <span>  <span class="va">sd_pooled</span>,</span>
@@ -64,7 +65,13 @@ using a two-sample (unpaired) t-test that ignores within-site correlation.</p>
 
 
 <dl><dt id="arg-s">S<a class="anchor" aria-label="anchor" href="#arg-s"></a></dt>
-<dd><p>Number of sites</p></dd>
+<dd><p>Number of sites both before and after (if S_before is NULL) or
+number of sites after (if S_before is provided)</p></dd>
+
+
+<dt id="arg-s-before">S_before<a class="anchor" aria-label="anchor" href="#arg-s-before"></a></dt>
+<dd><p>Number of sites before, if you wish to keep this number
+constant in the analysis. Defaults to NULL, which makes S the same before and after.</p></dd>
 
 
 <dt id="arg-nb">nB<a class="anchor" aria-label="anchor" href="#arg-nb"></a></dt>
