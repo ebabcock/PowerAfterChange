@@ -9,6 +9,7 @@ correlation.
 ``` r
 find_min_detectable_percent_2samp(
   S,
+  S_before = NULL,
   nB,
   nA,
   sd_pooled,
@@ -23,7 +24,14 @@ find_min_detectable_percent_2samp(
 
 - S:
 
-  Number of sites
+  Number of sites both before and after (if S_before is NULL) or number
+  of sites after (if S_before is provided)
+
+- S_before:
+
+  Number of sites before, if you wish to keep this number constant in
+  the analysis. Defaults to NULL, which makes S the same before and
+  after.
 
 - nB:
 
