@@ -731,7 +731,10 @@ find_min_detectable_percent_2samp <- function(S,
                                               target_power = 0.8,
                                               alpha = 0.05,
                                               typeTransform = "arcsin") {
-  n_before <- if_else(is.null(S_before), S * nB, S_before * nB)
+  if (is.null(S_before)) {
+    S_before <- S
+  }
+  n_before <- S_before * nB
   n_after  <- S * nA
 
   # 1. Find the required delta on the TRANSFORMED scale
