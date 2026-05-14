@@ -8,11 +8,11 @@ library(future.apply)
 # ==============================================================================
 # Load data (Adjust path as needed)
 # trout <- read.csv("G:/My Drive/IBBEAM/Power analysis/Raw data/Sportfish/trout.csv") 
-trout <- read.csv("C:/Users/nal102/OneDrive - University of Miami/Desktop/Habitat ecology/Sportfish project/CSV/trout_counts_&_env.csv") %>%
-  filter(year <= 2017, month %in% 5:11) %>%
-  mutate(sg_cover = mean_pc_Thalassia + mean_pc_Halodule + mean_pc_Syringodium,
-         zone = as.factor(zone),
-         month = as.factor(month))
+#trout <- read.csv("C:/Users/nal102/OneDrive - University of Miami/Desktop/Habitat ecology/Sportfish project/CSV/trout_counts_&_env.csv") %>%
+#  filter(year <= 2017, month %in% 5:11) %>%
+#  mutate(sg_cover = mean_pc_Thalassia + mean_pc_Halodule + mean_pc_Syringodium,
+#         zone = as.factor(zone),
+#         month = as.factor(month))
 
 
 
