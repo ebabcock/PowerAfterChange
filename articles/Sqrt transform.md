@@ -4,6 +4,7 @@ Demo: Power for a 30% change using `typeTransform = "sqrt"` and
 `addValue = 0.5`
 
 ``` r
+
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
@@ -13,6 +14,7 @@ library(PowerAfterChange) #Library with functions for analysis
 ### Simulate some data
 
 ``` r
+
 set.seed(123) #for reproducibility
 S_demo <- 12 #Number of sites
 nB_demo <- 5 #Number of before samples per site
@@ -30,6 +32,7 @@ baseline_demo <- data.frame(
 1.  Summarize baseline to get mean and within-site SD on sqrt scale
 
 ``` r
+
 base_summary <- summarize_baseline(
   baseline=baseline_demo,
   siteVar = "site",
@@ -59,6 +62,7 @@ base_summary <- summarize_baseline(
 Extract inputs
 
 ``` r
+
 baseline_mean <- base_summary$grand_mean
 sd_within_sqrt <- base_summary$sqrtsd_within
 ```
@@ -66,6 +70,7 @@ sd_within_sqrt <- base_summary$sqrtsd_within
 Compute power for a 30% change
 
 ``` r
+
 power_30pct <- power_for_percent_change(
   percent_change = 30,
   baseline_mean = baseline_mean,

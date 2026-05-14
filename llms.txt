@@ -15,6 +15,7 @@ per site. Possible questions to ask are:
 To load the project, run:
 
 ``` r
+
 devtools::install_github("ebabcock/PowerAfterChange")
 library(PowerAfterChange)
 ```

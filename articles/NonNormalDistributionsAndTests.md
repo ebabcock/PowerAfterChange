@@ -1,6 +1,7 @@
 # PowerAfterChange: Simulation Tests for Alternative Distributions and Tests
 
 ``` r
+
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
@@ -14,6 +15,7 @@ options (`paired-t`, `wilcoxon`, `prop.test`).
 ## Shared simulation settings
 
 ``` r
+
 set.seed(2026)
 S_demo <- 12
 nB_demo <- 5
@@ -27,6 +29,7 @@ n_grid <- 1:30
 ## Normal distribution tests
 
 ``` r
+
 delta_target <- 0.8
 
 res_normal_t <- find_n_after(
@@ -69,6 +72,7 @@ ggplot(normal_plot_df, aes(x = n_after, y = power, color = method)) +
 ## Negative binomial tests (log-additive change)
 
 ``` r
+
 nbinom_mu <- 12
 nbinom_disp <- 2
 delta_target_nb <- log(1.25)  # additive on log scale
@@ -117,6 +121,7 @@ ggplot(nb_plot_df, aes(x = n_after, y = power, color = method)) +
 ## Binomial tests (logit-additive change)
 
 ``` r
+
 binomial_size <- 20
 binomial_prob <- 0.35
 delta_target_bin <- qlogis(0.45) - qlogis(binomial_prob)
@@ -177,6 +182,7 @@ ggplot(bin_plot_df, aes(x = n_after, y = power, color = method)) +
 ## Sanity checks for `power_for_sites`
 
 ``` r
+
 site_res_normal <- find_min_sites(
   nB = nB_demo, nA = 5,
   delta = delta_target, sd_w = sd_w, sd_d = sd_d,

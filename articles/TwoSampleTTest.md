@@ -25,6 +25,7 @@ The functions are:
   — analytical minimum detectable percent change
 
 ``` r
+
 library(tidyverse)
 theme_set(theme_minimal())
 library(PowerAfterChange)
@@ -36,6 +37,7 @@ We use the **same simulated dataset** as `UserGuide.Rmd` so that results
 can be directly compared.
 
 ``` r
+
 set.seed(123)
 S_demo    <- 12
 nB_demo   <- 5
@@ -51,12 +53,14 @@ baseline_demo <- data.frame(
 ### Estimate total standard deviation among samples
 
 ``` r
+
 sd_total <- sd(baseline_demo$y)
 ```
 
 ### Planning assumptions
 
 ``` r
+
 delta_target <- 1    # absolute change to detect
 sd_delta     <- 0.5  # site-to-site variability in true changes
 ```
@@ -66,6 +70,7 @@ sd_delta     <- 0.5  # site-to-site variability in true changes
 ## Question 1: Minimum number of sites (nB = 5, nA = 5)
 
 ``` r
+
 sites_2samp <- find_min_sites_2samp(
   nB = nB_demo, nA = 5,
   delta = delta_target,
@@ -79,6 +84,7 @@ sites_2samp$S_star
     ## [1] 12
 
 ``` r
+
 ggplot(sites_2samp$curve, aes(x = S, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -93,6 +99,7 @@ ggplot(sites_2samp$curve, aes(x = S, y = power)) +
 ## Question 2: Minimum after samples per site (S = 12, nB = 5)
 
 ``` r
+
 n_after_2samp <- find_n_after_2samp(
   S  = S_demo, nB = nB_demo,
   delta = delta_target,
@@ -106,6 +113,7 @@ n_after_2samp$n_star
     ## [1] 5
 
 ``` r
+
 ggplot(n_after_2samp$curve, aes(x = n_after, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -122,6 +130,7 @@ ggplot(n_after_2samp$curve, aes(x = n_after, y = power)) +
 ## Question 3: Minimum detectable percent change (S = 12, nB = 5, nA = 5)
 
 ``` r
+
 min_pct_2samp <- find_min_detectable_percent_2samp(
   S = S_demo, nB = nB_demo, nA = 5,
   sd_pooled = sd_total,
@@ -133,6 +142,7 @@ min_pct_2samp <- find_min_detectable_percent_2samp(
     ## Warning in asin(sqrt(baseline_mean)): NaNs produced
 
 ``` r
+
 min_pct_2samp
 ```
 
@@ -142,6 +152,7 @@ How does the minimum detectable percent change vary with the number of
 after samples?
 
 ``` r
+
 nA_grid <- 1:40
 detectable_2samp_df <- data.frame(
   n_after = nA_grid,
@@ -198,6 +209,7 @@ detectable_2samp_df <- data.frame(
     ## Warning in asin(sqrt(baseline_mean)): NaNs produced
 
 ``` r
+
 ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
   geom_line() +
   geom_hline(yintercept = min_pct_2samp, linetype = "dashed", color = "red") +
@@ -227,6 +239,7 @@ accounts for between-site variability in changes (`sd_d`), while the
 two-sample design ignores site structure entirely.
 
 ``` r
+
 nA_grid <- 1:40
 
 # Paired analytical power (includes sd_delta for between-site change variability)
@@ -283,6 +296,7 @@ them to simulation-based estimates from `power_for_n_after_2samp` for a
 few values of `nA`.
 
 ``` r
+
 nA_check <- c(2, 5, 10, 20)
 
 sim_power <- sapply(nA_check, function(nA) {
@@ -313,7 +327,7 @@ knitr::kable(validation_df,
 |  10 |      0.911 |      0.912 |
 |  20 |      0.952 |      0.949 |
 
-Two-sample t-test: Analytical vs. Simulation Power
+Two-sample t-test: Analytical vs. Simulation Power {.table}
 
 The simulation and analytical results agree closely, confirming that the
 analytical formula based on the non-central t distribution is correct.

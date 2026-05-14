@@ -42,6 +42,7 @@ with no log transformation for simplicity and to compare with
 power.t.test.
 
 ``` r
+
 library(tidyverse)
 theme_set(theme_minimal())
 #devtools::install_github("ebabcock/PowerAfterChange")
@@ -51,6 +52,7 @@ library(PowerAfterChange) #Library with functions for analysis
 ### Simulate some data
 
 ``` r
+
 set.seed(123) #for reproducibility
 S_demo <- 12 #Number of sites
 nB_demo <- 5 #Number of before samples per site
@@ -72,6 +74,7 @@ calculations. Here we estimate it from the baseline data. See
 getSD_within function in PowerAfterFunctions for the code.
 
 ``` r
+
 sd_within_hat <-getSD_within(baseline = baseline_demo,
                              siteVar = "site",
                              responseVar = "y")
@@ -85,6 +88,7 @@ sd_within_hat
 This is the change we want to be able to detect with sufficient power.
 
 ``` r
+
 delta_target <- 1  #change in the mean we want to detect
 sd_delta <- 0.5  #variability in true changes among sites
 ```
@@ -99,6 +103,7 @@ are equivalent when we calculate the standard deviation of the
 difference correctly.
 
 ``` r
+
 site_res <- find_min_sites(nB = nB_demo, nA = 5,
                            delta = delta_target,
                            sd_w = sd_within_hat, sd_d = sd_delta,
@@ -111,6 +116,7 @@ site_res$S_star
     ## [1] 13
 
 ``` r
+
 # Plot power curve for sites
 ggplot(site_res$curve, aes(x = S, y = power)) +
   geom_line() +
@@ -133,7 +139,9 @@ for comparison.
 
 The standard deviation of the difference between after and before means
 per site is calculated as:
-$$s_{dif} = \sqrt{(sd_{w}^{2}\left( 1/n_{A} + 1/n_{B} \right) + sd_{d}^{2}})$$
+``` math
+s_{dif}=\sqrt{(sd_w^2(1/n_A + 1/n_B) + sd_d^2})
+```
 
 This combines: - Within-site variance for after measurements:
 sd_w^2/nA - Within-site variance for before measurements: sd_w^2/nB -
@@ -142,6 +150,7 @@ Between-site variance in true changes: sd_d^2
 The function getSD_difference makes this calculation.
 
 ``` r
+
 sd_diff_hat <- getSD_difference(sd_within = sd_within_hat,
                                  nA = 5,
                                  nB = 5,
@@ -155,6 +164,7 @@ We can then use power.t.test to find the number of sites needed for the
 paired t-test.
 
 ``` r
+
 power_result <- power.t.test(n = NULL,
                               delta = delta_target,
                               sd = sd_diff_hat,
@@ -171,6 +181,7 @@ This matches the result from our simulation function find_min_sites.
 Here is the power curve.
 
 ``` r
+
 comparison_df <- data.frame(
   n_sites = site_res$curve$S,
   power_analytical = find_min_sites_analytical(S_grid = site_res$curve$S,
@@ -209,6 +220,7 @@ of samples after the change needed to achieve target power, given the
 number of sites and samples before the change.
 
 ``` r
+
 res_n_after <- find_n_after(S = S_demo, nB = nB_demo,
                     delta = delta_target,
                     sd_w = sd_within_hat, sd_d = sd_delta,
@@ -220,6 +232,7 @@ res_n_after$n_star  #Number of after samples need for specified power
     ## [1] 6
 
 ``` r
+
 head(res_n_after$curve)
 ```
 
@@ -232,6 +245,7 @@ head(res_n_after$curve)
     ## 6       6 0.8070000
 
 ``` r
+
 # Plot power curve for number of samples after
 ggplot(res_n_after$curve, aes(x = n_after, y = power)) +
   geom_line() +
@@ -253,6 +267,7 @@ for comparison. The standard deviation of the difference between after
 and before means per site is calculated as before.
 
 ``` r
+
 # Calculate power for a range of nA values
 nA_grid <- 1:40
 power_values <- sapply(nA_grid, function(nA) {
@@ -304,6 +319,7 @@ simulated data and planning assumptions as above, then visualize how it
 varies with the number of after samples per site.
 
 ``` r
+
 # Minimum detectable percent change for the demo scenario
 min_detectable_pct <- find_min_detectable_percent(
   S = S_demo,
@@ -324,6 +340,7 @@ min_detectable_pct
 Plot detectable percent change over a range of nA values
 
 ``` r
+
 nA_grid <- 1:40
 detectable_df <- data.frame(
   n_after = nA_grid,
@@ -357,6 +374,7 @@ Plot power vs. minimum detectable percent change over a range of nA
 values
 
 ``` r
+
 inputGrid<-expand.grid(nA = 1:40, percent_change = seq(5,30,5))
 inputGrid$power <- mapply(function(nA, pct) {
   power_for_percent_change(
@@ -400,6 +418,7 @@ signed-rank test instead of the paired t-test. These calculations use
 simulation (`useTest = "wilcoxon"`).
 
 ``` r
+
 # (a) Minimum sites with Wilcoxon test
 site_res_wilcox <- find_min_sites(
   nB = nB_demo, nA = 5,
@@ -416,6 +435,7 @@ site_res_wilcox$S_star
     ## [1] 13
 
 ``` r
+
 ggplot(site_res_wilcox$curve, aes(x = S, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
@@ -430,6 +450,7 @@ ggplot(site_res_wilcox$curve, aes(x = S, y = power)) +
 ![](UserGuide_files/figure-html/unnamed-chunk-14-1.png)
 
 ``` r
+
 # (b) Minimum n_after with Wilcoxon test
 res_n_after_wilcox <- find_n_after(
   S = S_demo, nB = nB_demo,
@@ -446,6 +467,7 @@ res_n_after_wilcox$n_star
     ## [1] 9
 
 ``` r
+
 ggplot(res_n_after_wilcox$curve, aes(x = n_after, y = power)) +
   geom_line() +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
