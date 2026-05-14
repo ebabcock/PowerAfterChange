@@ -1,7 +1,10 @@
 #' power_for_n_after
 #'
 #' Estimate power for a paired t-test on the average of a given number of
-#' measurements at a fixed number of sites before and after a changepoint.
+#' measurements at a fixed number of sites before and after a changepoint,
+#' or for an equivalent wilcoxon, or a proportion test if the data are presence/
+#' absence, or a normal test on the coefficient of a negative binomial GLMM
+#' before-after coefficient.
 #'
 #' @param S Number of sites
 #' @param nB  Number of before measurements per site
@@ -14,7 +17,7 @@
 #' @param seed Random seed for reproducibility
 #' @param distribution Distribution for simulated data. One of
 #'   "normal", "nbinom", or "binomial".
-#' @param useTest Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+#' @param useTest Which test to use. One of "paired-t", "wilcoxon", "prop.test", or ,"GLMM-NB2".
 #' @param nbinom_mu Mean parameter for negative binomial (mu)
 #' @param nbinom_disp Dispersion (size) parameter for negative binomial
 #' @param binomial_size Size parameter (trials) for binomial
@@ -27,7 +30,7 @@ power_for_n_after <- function(S, nB, nA,
                               delta, sd_w, sd_d = 0,
                               alpha = 0.05, nsim = 2000, seed = 1,
                               distribution = c("normal", "nbinom", "binomial"),
-                              useTest = c("paired-t", "wilcoxon", "prop.test"),
+                              useTest = c("paired-t", "wilcoxon", "prop.test","GLMM-NB"),
                               nbinom_mu = NULL, nbinom_disp = NULL,
                               binomial_size = NULL, binomial_prob = NULL) {
   set.seed(seed)
@@ -44,6 +47,10 @@ power_for_n_after <- function(S, nB, nA,
 
   if (distribution == "binomial" && (is.null(binomial_size) || is.null(binomial_prob))) {
     stop("For distribution = 'binomial', provide binomial_size and binomial_prob.")
+  }
+
+  if (useTest == "GLMM-NB" && distribution != "nbinom") {
+    stop("useTest = 'GLMM-NB' is only supported for distribution = 'nbinom'.")
   }
 
   pvals <- replicate(nsim, {
@@ -82,12 +89,37 @@ power_for_n_after <- function(S, nB, nA,
       if (useTest == "paired-t") {
         t.test(D, mu = 0)$p.value
       } else {
-        wilcox.test(D, mu = 0)$p.value
+        suppressWarnings(wilcox.test(D, mu = 0))$p.value
       }
-    } else {
+    }
+    else if (useTest == "prop.test") {
       total_success <- c(sum(yB), sum(yA))
       total_trials <- c(S * nB * binomial_size, S * nA * binomial_size)
       prop.test(total_success, total_trials, correct = FALSE)$p.value
+
+    } else if (useTest == "GLMM-NB") {
+       df_sim <- data.frame(
+        y      = c(as.vector(t(yB)), as.vector(t(yA))),
+        site   = factor(c(rep(seq_len(S), each = nB),
+                          rep(seq_len(S), each = nA))),
+        period = factor(c(rep("before", S * nB),
+                          rep("after",  S * nA)))
+      )
+      fit_full <- glmmTMB::glmmTMB(
+        y ~ period + (1 | site),
+        data   = df_sim,
+        family = glmmTMB::nbinom2
+      )
+      coef_table <- summary(fit_full)$coefficients$cond
+      coef_table["periodbefore", "Pr(>|z|)"]
+      #Full LRT was too slow
+      # fit_null <- glmmTMB::glmmTMB(
+      #   y ~ 1 + (1 | site),
+      #   data   = df_sim,
+      #   family = glmmTMB::nbinom2
+      # )
+      # lrt <- anova(fit_null, fit_full)
+      # lrt$`Pr(>Chisq)`[2]
     }
   })
 
@@ -111,7 +143,7 @@ power_for_n_after <- function(S, nB, nA,
 #' @param seed Random seed for reproducibility
 #' @param distribution Distribution for simulated data. One of
 #'   "normal", "nbinom", or "binomial".
-#' @param useTest Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+#' @param useTest Which test to use. One of "paired-t", "wilcoxon", "prop.test", "GLMM_NB".
 #' @param nbinom_mu Mean parameter for negative binomial (mu)
 #' @param nbinom_disp Dispersion (size) parameter for negative binomial
 #' @param binomial_size Size parameter (trials) for binomial
@@ -127,7 +159,7 @@ find_n_after <- function(S, nB,
                          n_grid = 1:50,
                          nsim = 2000, seed = 1,
                          distribution = c("normal", "nbinom", "binomial"),
-                         useTest = c("paired-t", "wilcoxon", "prop.test"),
+                         useTest = c("paired-t", "wilcoxon", "prop.test","GLMM-NB"),
                          nbinom_mu = NULL, nbinom_disp = NULL,
                          binomial_size = NULL, binomial_prob = NULL) {
   pow <- sapply(n_grid, function(nA) {
@@ -377,7 +409,7 @@ summarize_baseline <- function(baseline,
   sqrtTransform  <- typeTransform == "sqrt"
   asinTransform  <- typeTransform == "arcsin"
 
-  returnVal <- baseline %>%
+  returnVal <-  baseline %>%
     group_by(across(all_of(c(group_syms)))) %>%
     mutate(
       grand_mean      = mean(!!sym(responseVar)),
@@ -386,7 +418,6 @@ summarize_baseline <- function(baseline,
       grand_logsd     = if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
       grand_sqrtmean  = if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
       grand_sqrtsd    = if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_),
-      # New Arcsin columns
       grand_asinmean  = if_else(asinTransform, mean(asin(sqrt(!!sym(responseVar)))), NA_real_),
       grand_asinsd    = if_else(asinTransform, sd(asin(sqrt(!!sym(responseVar)))), NA_real_)
     ) %>%
@@ -425,7 +456,8 @@ summarize_baseline <- function(baseline,
       nB_incomplete   = if_else(length(unique(n)) > 1, max(n) - min(n), NA_real_),
       .groups = "drop"
     ) %>%
-    select(where(~ any(!is.na(.))))
+    select(where(~ any(!is.na(.)))) %>%
+    suppressWarnings()
 
   if (any(is.na(returnVal$nB))) {
     warning("Number of before samples per site is not consistent. nB set to NA.")
