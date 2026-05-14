@@ -16,7 +16,7 @@ find_min_sites(
   nsim = 2000,
   seed = 1,
   distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  useTest = c("paired-t", "wilcoxon", "prop.test", "GLMM-NB"),
   nbinom_mu = NULL,
   nbinom_disp = NULL,
   binomial_size = NULL,
@@ -47,7 +47,7 @@ find_min_sites(
 \item{distribution}{Distribution for simulated data. One of
 "normal", "nbinom", or "binomial".}
 
-\item{useTest}{Which test to use. One of "paired-t", "wilcoxon", or "prop.test".}
+\item{useTest}{Which test to use. One of "paired-t", "wilcoxon", "prop.test", "GLMM-NB".}
 
 \item{nbinom_mu}{Mean parameter for negative binomial (mu)}
 
@@ -62,5 +62,7 @@ A list containing the minimum number of sites needed to achieve the target power
 }
 \description{
 Function to find the minimum number of sites needed to achieve target power from
-a paired t test on the means across observations at sites before and after a changepoint.
+a paired t test on the means across observations at sites before and after a changepoint,
+or equivalent Wilcoxon or proportion test for presence/absence data, or normal
+test on the before-after coefficient in a negative binomial GLMM.
 }

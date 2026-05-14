@@ -44,7 +44,7 @@ power_for_sites(
 \item{distribution}{Distribution for simulated data. One of
 "normal", "nbinom", or "binomial".}
 
-\item{useTest}{Which test to use. One of "paired-t", "wilcoxon", or "prop.test".}
+\item{useTest}{Which test to use. One of "paired-t", "wilcoxon",  "prop.test", or "GLMM-NB".}
 
 \item{nbinom_mu}{Mean parameter for negative binomial (mu)}
 
