@@ -15,7 +15,7 @@ power_for_n_after(
   nsim = 2000,
   seed = 1,
   distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  useTest = c("paired-t", "wilcoxon", "prop.test", "GLMM-NB"),
   nbinom_mu = NULL,
   nbinom_disp = NULL,
   binomial_size = NULL,
@@ -44,7 +44,7 @@ power_for_n_after(
 \item{distribution}{Distribution for simulated data. One of
 "normal", "nbinom", or "binomial".}
 
-\item{useTest}{Which test to use. One of "paired-t", "wilcoxon", or "prop.test".}
+\item{useTest}{Which test to use. One of "paired-t", "wilcoxon", "prop.test", or ,"GLMM-NB2".}
 
 \item{nbinom_mu}{Mean parameter for negative binomial (mu)}
 
@@ -59,5 +59,8 @@ Estimated power for the given number of after measurements
 }
 \description{
 Estimate power for a paired t-test on the average of a given number of
-measurements at a fixed number of sites before and after a changepoint.
+measurements at a fixed number of sites before and after a changepoint,
+or for an equivalent wilcoxon, or a proportion test if the data are presence/
+absence, or a normal test on the coefficient of a negative binomial GLMM
+before-after coefficient.
 }

@@ -179,7 +179,7 @@ bin_plot_df <- bind_rows(
 )
 
 ggplot(bin_plot_df, aes(x = n_after, y = power, color = method)) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
   labs(
     title = "Binomial: Power vs After Samples",

@@ -195,7 +195,7 @@ find_n_after <- function(S, nB,
 #' @param seed Random seed for reproducibility
 #' @param distribution Distribution for simulated data. One of
 #'   "normal", "nbinom", or "binomial".
-#' @param useTest Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+#' @param useTest Which test to use. One of "paired-t", "wilcoxon",  "prop.test", or "GLMM-NB".
 #' @param nbinom_mu Mean parameter for negative binomial (mu)
 #' @param nbinom_disp Dispersion (size) parameter for negative binomial
 #' @param binomial_size Size parameter (trials) for binomial
@@ -225,7 +225,9 @@ power_for_sites <- function(S, nB, nA,
 #' find_min_sites
 #'
 #' Function to find the minimum number of sites needed to achieve target power from
-#' a paired t test on the means across observations at sites before and after a changepoint.
+#' a paired t test on the means across observations at sites before and after a changepoint,
+#' or equivalent Wilcoxon or proportion test for presence/absence data, or normal
+#' test on the before-after coefficient in a negative binomial GLMM.
 #'
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
@@ -239,7 +241,7 @@ power_for_sites <- function(S, nB, nA,
 #' @param seed Random seed for reproducibility
 #' @param distribution Distribution for simulated data. One of
 #'   "normal", "nbinom", or "binomial".
-#' @param useTest Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+#' @param useTest Which test to use. One of "paired-t", "wilcoxon", "prop.test", "GLMM-NB".
 #' @param nbinom_mu Mean parameter for negative binomial (mu)
 #' @param nbinom_disp Dispersion (size) parameter for negative binomial
 #' @param binomial_size Size parameter (trials) for binomial
@@ -255,7 +257,7 @@ find_min_sites <- function(nB, nA,
                            S_grid = 2:50,
                            nsim = 2000, seed = 1,
                            distribution = c("normal", "nbinom", "binomial"),
-                           useTest = c("paired-t", "wilcoxon", "prop.test"),
+                           useTest = c("paired-t", "wilcoxon", "prop.test","GLMM-NB"),
                            nbinom_mu = NULL, nbinom_disp = NULL,
                            binomial_size = NULL, binomial_prob = NULL) {
   S_grid <- S_grid[S_grid >= 2]
