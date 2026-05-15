@@ -744,59 +744,102 @@ power_for_n_after_2samp <- function(S, nB, nA,
 #' using a two-sample (unpaired) t-test that ignores within-site correlation.
 #'
 #' @param S Number of sites both before and after (if S_before is NULL) or
-#' number of sites after (if S_before is provided)
+#'   number of sites after (if S_before is provided)
 #' @param S_before Number of sites before, if you wish to keep this number
-#' constant in the analysis. Defaults to NULL, which makes S the same before and after.
+#'   constant in the analysis. Defaults to NULL, which makes S the same before and after.
 #' @param nB Number of before measurements per site
 #' @param nA Number of after measurements per site
-#' @param sd_pooled Standard deviation among all data points
-#' @param baseline_mean Mean of the response variable before the change (used to
-#'   convert the detectable absolute delta to a percent change)
+#' @param sd_pooled Pooled standard deviation among all data points (on the
+#'   transformed scale)
+#' @param baseline_mean Mean of the response variable before the change in the
+#'   original (untransformed) scale. Required for all typeTransform values to
+#'   convert the detectable absolute delta back to a percent change.
 #' @param target_power Desired power (default 0.8)
 #' @param alpha Significance level (default 0.05)
+#' @param typeTransform Character indicating the transformation applied to the
+#'   response variable before analysis. One of \code{"none"}, \code{"log"},
+#'   \code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).
+#' @param addValue Value added to the response variable before transforming, to
+#'   avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.
 #'
 #' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
 #' @export
 find_min_detectable_percent_2samp <- function(S,
-                                              S_before=NULL,
+                                              S_before = NULL,
                                               nB, nA,
                                               sd_pooled,
                                               baseline_mean,
                                               target_power = 0.8,
                                               alpha = 0.05,
-                                              typeTransform = "arcsin") {
+                                              typeTransform = c("none", "log", "sqrt", "arcsin"),
+                                              addValue = 0) {
+  typeTransform <- match.arg(typeTransform)
+
+  if (is.null(baseline_mean)) {
+    stop("baseline_mean must be provided.")
+  }
+  if (typeTransform %in% c("log", "sqrt") && is.null(baseline_mean)) {
+    stop("baseline_mean must be provided when typeTransform is 'log' or 'sqrt'.")
+  }
+  if (typeTransform == "log" && baseline_mean + addValue <= 0) {
+    stop("baseline_mean + addValue must be > 0 when typeTransform is 'log'.")
+  }
+  if (typeTransform == "sqrt" && baseline_mean + addValue < 0) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
+  }
+  if (typeTransform == "arcsin" && (baseline_mean < 0 || baseline_mean > 1)) {
+    stop("baseline_mean must be in [0, 1] when typeTransform is 'arcsin'.")
+  }
+
   if (is.null(S_before)) {
     S_before <- S
   }
   n_before <- S_before * nB
   n_after  <- S * nA
 
-  # 1. Find the required delta on the TRANSFORMED scale
+  # Set uniroot upper bound based on transform scale
+  upper_bound <- switch(
+    typeTransform,
+    none   = max(abs(baseline_mean) * 10, 5),
+    log    = 10,
+    sqrt   = 10,
+    arcsin = pi / 2 - 1e-6   # asin(sqrt(x)) range is [0, pi/2]
+  )
+
+  # 1. Find the required delta on the transformed scale
   power_root_func <- function(delta_t) {
     power_2samp_analytical(n_before, n_after, delta_t, sd_pooled, alpha) - target_power
   }
 
-  fit <- uniroot(power_root_func, interval = c(1e-6, 2)) # Arcsin scale max is ~1.57
+  fit <- uniroot(power_root_func, interval = c(1e-6, upper_bound))
   delta_t_required <- fit$root
 
-  # 2. Back-transform to find the detectable change in original units
-  if (typeTransform == "arcsin") {
-    # Transform baseline to arcsin scale
-    baseline_t <- asin(sqrt(baseline_mean))
-    # Add the required change
-    new_mean_t <- baseline_t + delta_t_required
-    # Back-transform to original proportion scale
-    new_mean <- (sin(new_mean_t))^2
-    # Calculate % change from original baseline
-    detectable_pct <- ((new_mean - baseline_mean) / baseline_mean) * 100
-
-  } else {
-    # Default linear logic for "none"
+  # 2. Back-transform delta to a percent change in the original scale
+  if (typeTransform == "none") {
     detectable_pct <- (delta_t_required / baseline_mean) * 100
+
+  } else if (typeTransform == "log") {
+    baseline_t     <- log(baseline_mean + addValue)
+    changed_t      <- baseline_t + delta_t_required
+    after          <- exp(changed_t) - addValue
+    detectable_pct <- ((after - baseline_mean) / baseline_mean) * 100
+
+  } else if (typeTransform == "sqrt") {
+    baseline_t     <- sqrt(baseline_mean + addValue)
+    changed_t      <- baseline_t + delta_t_required
+    after          <- changed_t^2 - addValue
+    detectable_pct <- ((after - baseline_mean) / baseline_mean) * 100
+
+  } else if (typeTransform == "arcsin") {
+    baseline_t     <- asin(sqrt(baseline_mean))
+    new_mean_t     <- baseline_t + delta_t_required
+    new_mean       <- sin(new_mean_t)^2
+    detectable_pct <- ((new_mean - baseline_mean) / baseline_mean) * 100
   }
 
   return(detectable_pct)
 }
+
 
 #' find_min_sites_2samp
 #'
@@ -815,6 +858,7 @@ find_min_detectable_percent_2samp <- function(S,
 #' @param target_power Desired power level (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #' @param S_grid Grid of site numbers to evaluate (default 2:50)
+#'
 #'
 #' @returns A list with `S_star` (minimum sites for target power) and `curve`
 #'   (data frame of S and power). If nB and nA are the number of years before

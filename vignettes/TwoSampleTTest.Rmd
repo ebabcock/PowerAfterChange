@@ -77,7 +77,9 @@ sites_2samp <- find_min_sites_2samp(
   delta = delta_target,
   sd_pooled  = sd_total,
   target_power = 0.8, alpha = 0.05,
-  S_grid = 2:50
+  S_grid = 2:50,
+  typeTransform="none",
+  addValue=0
 )
 sites_2samp$S_star
 ```
@@ -124,7 +126,9 @@ min_pct_2samp <- find_min_detectable_percent_2samp(
   S = S_demo, nB = nB_demo, nA = 5,
   sd_pooled = sd_total,
   baseline_mean = before_mean,
-  target_power = 0.8, alpha = 0.05
+  target_power = 0.8, alpha = 0.05,
+  typeTransform = "none",
+  addValue = 0
 )
 min_pct_2samp
 ```
