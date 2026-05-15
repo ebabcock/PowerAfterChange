@@ -53,7 +53,7 @@ normal_plot_df <- bind_rows(
 )
 
 ggplot(normal_plot_df, aes(x = n_after, y = power, color = method)) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
   labs(
     title = "Normal: Power vs After Samples",
@@ -95,13 +95,27 @@ res_nb_w <- find_n_after(
   nbinom_disp = nbinom_disp
 )
 
+#This is a test based on GLMM. It is slow so use few sims
+res_nb_g <- find_n_after(
+  S = S_demo, nB = nB_demo,
+  delta = delta_target_nb, sd_w = sd_w, sd_d = sd_d,
+  target_power = 0.8, alpha = alpha, n_grid = n_grid,
+  nsim = 100, seed = 4,
+  distribution = "nbinom",
+  useTest = "GLMM-NB",
+  nbinom_mu = nbinom_mu,
+  nbinom_disp = nbinom_disp
+)
+
+
 nb_plot_df <- bind_rows(
   res_nb_t$curve %>% mutate(method = "paired-t"),
-  res_nb_w$curve %>% mutate(method = "wilcoxon")
+  res_nb_w$curve %>% mutate(method = "wilcoxon"),
+  res_nb_g$curve %>% mutate(method = "GLMM-NB")
 )
 
 ggplot(nb_plot_df, aes(x = n_after, y = power, color = method)) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
   labs(
     title = "Negative Binomial: Power vs After Samples",
@@ -161,7 +175,7 @@ bin_plot_df <- bind_rows(
 )
 
 ggplot(bin_plot_df, aes(x = n_after, y = power, color = method)) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
   labs(
     title = "Binomial: Power vs After Samples",
