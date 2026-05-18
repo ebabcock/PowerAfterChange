@@ -18,7 +18,7 @@ find_n_after(
   nsim = 2000,
   seed = 1,
   distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  useTest = c("paired-t", "wilcoxon", "prop.test", "GLMM-NB"),
   nbinom_mu = NULL,
   nbinom_disp = NULL,
   binomial_size = NULL,
@@ -75,7 +75,8 @@ find_n_after(
 
 - useTest:
 
-  Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+  Which test to use. One of "paired-t", "wilcoxon", "prop.test",
+  "GLMM_NB".
 
 - nbinom_mu:
 

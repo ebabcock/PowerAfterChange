@@ -16,7 +16,8 @@ find_min_detectable_percent_2samp(
   baseline_mean,
   target_power = 0.8,
   alpha = 0.05,
-  typeTransform = "arcsin"
+  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  addValue = 0
 )
 ```
 
@@ -43,12 +44,14 @@ find_min_detectable_percent_2samp(
 
 - sd_pooled:
 
-  Standard deviation among all data points
+  Pooled standard deviation among all data points (on the transformed
+  scale)
 
 - baseline_mean:
 
-  Mean of the response variable before the change (used to convert the
-  detectable absolute delta to a percent change)
+  Mean of the response variable before the change in the original
+  (untransformed) scale. Required for all typeTransform values to
+  convert the detectable absolute delta back to a percent change.
 
 - target_power:
 
@@ -57,6 +60,17 @@ find_min_detectable_percent_2samp(
 - alpha:
 
   Significance level (default 0.05)
+
+- typeTransform:
+
+  Character indicating the transformation applied to the response
+  variable before analysis. One of `"none"`, `"log"`, `"sqrt"`, or
+  `"arcsin"` for arcsin(sqrt) (default `"none"`).
+
+- addValue:
+
+  Value added to the response variable before transforming, to avoid
+  issues with zeros (default 0). Ignored for `"arcsin"`.
 
 ## Value
 

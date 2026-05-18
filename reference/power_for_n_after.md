@@ -1,7 +1,10 @@
 # power_for_n_after
 
 Estimate power for a paired t-test on the average of a given number of
-measurements at a fixed number of sites before and after a changepoint.
+measurements at a fixed number of sites before and after a changepoint,
+or for an equivalent wilcoxon, or a proportion test if the data are
+presence/ absence, or a normal test on the coefficient of a negative
+binomial GLMM before-after coefficient.
 
 ## Usage
 
@@ -17,7 +20,7 @@ power_for_n_after(
   nsim = 2000,
   seed = 1,
   distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  useTest = c("paired-t", "wilcoxon", "prop.test", "GLMM-NB"),
   nbinom_mu = NULL,
   nbinom_disp = NULL,
   binomial_size = NULL,
@@ -70,7 +73,8 @@ power_for_n_after(
 
 - useTest:
 
-  Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+  Which test to use. One of "paired-t", "wilcoxon", "prop.test", or
+  ,"GLMM-NB2".
 
 - nbinom_mu:
 

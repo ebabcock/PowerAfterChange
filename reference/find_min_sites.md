@@ -2,7 +2,9 @@
 
 Function to find the minimum number of sites needed to achieve target
 power from a paired t test on the means across observations at sites
-before and after a changepoint.
+before and after a changepoint, or equivalent Wilcoxon or proportion
+test for presence/absence data, or normal test on the before-after
+coefficient in a negative binomial GLMM.
 
 ## Usage
 
@@ -19,7 +21,7 @@ find_min_sites(
   nsim = 2000,
   seed = 1,
   distribution = c("normal", "nbinom", "binomial"),
-  useTest = c("paired-t", "wilcoxon", "prop.test"),
+  useTest = c("paired-t", "wilcoxon", "prop.test", "GLMM-NB"),
   nbinom_mu = NULL,
   nbinom_disp = NULL,
   binomial_size = NULL,
@@ -76,7 +78,8 @@ find_min_sites(
 
 - useTest:
 
-  Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+  Which test to use. One of "paired-t", "wilcoxon", "prop.test",
+  "GLMM-NB".
 
 - nbinom_mu:
 

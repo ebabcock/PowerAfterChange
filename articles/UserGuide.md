@@ -27,7 +27,7 @@ Functions are based on Monte Carlo simulation of normal data and using
 the power.t.test function, to show that they are equivalent.
 
 The functions were generated with the help of ChatGPT and GitHub Copilot
-(various AI tools) 1/30/2026-2/21/2026.
+(various AI tools) 1/30/2026-4/15/2026.
 
 The following is a simulated data demo. The simulated data is data
 before the change, and we use this data to get an estimate of the
@@ -288,7 +288,7 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
   geom_line(aes(y = power_analytical, color = "power.t.test"),
             linetype = 1) +
   geom_line(aes(y = power_simulation, color = "Simulation"),
-            linetype = 1, linetype = "dashed") +
+            linewidth= 1, linetype = "dashed") +
   geom_hline(yintercept = 0.8, linetype = "dotted", color = "gray50") +
   geom_vline(xintercept = ceiling(res_n_after$n_star),
              linetype = "dotted", color = "red", alpha = 0.5) +
@@ -304,9 +304,6 @@ ggplot(comparison_nA_df, aes(x = n_after)) +
                                 "Simulation" = "red")) +
   theme(legend.position = "bottom")
 ```
-
-    ## Warning: Duplicated aesthetics after name standardisation:
-    ## linetype
 
 ![](UserGuide_files/figure-html/unnamed-chunk-10-1.png)
 

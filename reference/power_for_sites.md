@@ -70,7 +70,8 @@ power_for_sites(
 
 - useTest:
 
-  Which test to use. One of "paired-t", "wilcoxon", or "prop.test".
+  Which test to use. One of "paired-t", "wilcoxon", "prop.test", or
+  "GLMM-NB".
 
 - nbinom_mu:
 
