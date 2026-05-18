@@ -13,7 +13,8 @@ find_min_detectable_percent_2samp(
   baseline_mean,
   target_power = 0.8,
   alpha = 0.05,
-  typeTransform = "arcsin"
+  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  addValue = 0
 )
 }
 \arguments{
@@ -27,14 +28,23 @@ constant in the analysis. Defaults to NULL, which makes S the same before and af
 
 \item{nA}{Number of after measurements per site}
 
-\item{sd_pooled}{Standard deviation among all data points}
+\item{sd_pooled}{Pooled standard deviation among all data points (on the
+transformed scale)}
 
-\item{baseline_mean}{Mean of the response variable before the change (used to
-convert the detectable absolute delta to a percent change)}
+\item{baseline_mean}{Mean of the response variable before the change in the
+original (untransformed) scale. Required for all typeTransform values to
+convert the detectable absolute delta back to a percent change.}
 
 \item{target_power}{Desired power (default 0.8)}
 
 \item{alpha}{Significance level (default 0.05)}
+
+\item{typeTransform}{Character indicating the transformation applied to the
+response variable before analysis. One of \code{"none"}, \code{"log"},
+\code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).}
+
+\item{addValue}{Value added to the response variable before transforming, to
+avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.}
 }
 \value{
 The minimum detectable percentage change (e.g., 30 for a 30\% change)

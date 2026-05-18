@@ -15,7 +15,10 @@ find_n_after_2samp(
   sd_pooled,
   target_power = 0.8,
   alpha = 0.05,
-  n_grid = 1:50
+  n_grid = 1:50,
+  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  addValue = 0,
+  baseline_mean = NULL
 )
 ```
 
@@ -36,11 +39,14 @@ find_n_after_2samp(
 
 - delta:
 
-  Hypothesized mean change
+  Hypothesized mean change (absolute, on the original untransformed
+  scale of the response). When `typeTransform` is not `"none"`, this
+  value is converted to the transformed scale internally using
+  `find_desired_change` before computing power.
 
 - sd_pooled:
 
-  Standard deviation among all samples
+  Standard deviation among all samples (on the transformed scale)
 
 - target_power:
 
@@ -53,6 +59,23 @@ find_n_after_2samp(
 - n_grid:
 
   Grid of after measurements to evaluate (default 1:50)
+
+- typeTransform:
+
+  Character indicating the transformation applied to the response
+  variable before analysis. One of `"none"`, `"log"`, `"sqrt"`, or
+  `"arcsin"` for arcsin(sqrt) (default `"none"`).
+
+- addValue:
+
+  Value added to the response variable before transforming, to avoid
+  issues with zeros (default 0). Ignored for `"arcsin"`.
+
+- baseline_mean:
+
+  Mean of the original (untransformed) response variable before the
+  change. Required when `typeTransform` is not `"none"` in order to
+  convert `delta` to the transformed scale.
 
 ## Value
 

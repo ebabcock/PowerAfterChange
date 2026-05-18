@@ -12,7 +12,10 @@ find_n_after_2samp(
   sd_pooled,
   target_power = 0.8,
   alpha = 0.05,
-  n_grid = 1:50
+  n_grid = 1:50,
+  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  addValue = 0,
+  baseline_mean = NULL
 )
 }
 \arguments{
@@ -23,15 +26,29 @@ constant in the analysis. Defaults to NULL, which keeps S sites before and after
 
 \item{nB}{Number of before measurements per site}
 
-\item{delta}{Hypothesized mean change}
+\item{delta}{Hypothesized mean change (absolute, on the original untransformed
+scale of the response). When \code{typeTransform} is not \code{"none"},
+this value is converted to the transformed scale internally using
+\code{find_desired_change} before computing power.}
 
-\item{sd_pooled}{Standard deviation among all samples}
+\item{sd_pooled}{Standard deviation among all samples (on the transformed scale)}
 
 \item{target_power}{Desired power level (default 0.8)}
 
 \item{alpha}{Significance level (default 0.05)}
 
 \item{n_grid}{Grid of after measurements to evaluate (default 1:50)}
+
+\item{typeTransform}{Character indicating the transformation applied to the
+response variable before analysis. One of \code{"none"}, \code{"log"},
+\code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).}
+
+\item{addValue}{Value added to the response variable before transforming, to
+avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.}
+
+\item{baseline_mean}{Mean of the original (untransformed) response variable
+before the change. Required when \code{typeTransform} is not \code{"none"}
+in order to convert \code{delta} to the transformed scale.}
 }
 \value{
 A list with \code{n_star} (minimum after measurements for target power)

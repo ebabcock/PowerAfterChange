@@ -71,7 +71,10 @@ sites_2samp <- find_min_sites_2samp(
   delta = delta_target,
   sd_pooled  = sd_total,
   target_power = 0.8, alpha = 0.05,
-  S_grid = 2:50
+  S_grid = 2:50,
+  typeTransform="none",
+  addValue=0,
+  baseline_mean = before_mean
 )
 sites_2samp$S_star
 ```
@@ -98,7 +101,10 @@ n_after_2samp <- find_n_after_2samp(
   delta = delta_target,
   sd_pooled  = sd_total,
   target_power = 0.8, alpha = 0.05,
-  n_grid = 1:40
+  n_grid = 1:40,
+  typeTransform="none",
+  addValue=0,
+  baseline_mean = before_mean
 )
 n_after_2samp$n_star
 ```
@@ -126,17 +132,14 @@ min_pct_2samp <- find_min_detectable_percent_2samp(
   S = S_demo, nB = nB_demo, nA = 5,
   sd_pooled = sd_total,
   baseline_mean = before_mean,
-  target_power = 0.8, alpha = 0.05
+  target_power = 0.8, alpha = 0.05,
+  typeTransform = "none",
+  addValue = 0
 )
-```
-
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-
-``` r
 min_pct_2samp
 ```
 
-    ## [1] NaN
+    ## [1] 9.813139
 
 How does the minimum detectable percent change vary with the number of
 after samples?
@@ -154,50 +157,7 @@ detectable_2samp_df <- data.frame(
     )
   })
 )
-```
 
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-    ## Warning in asin(sqrt(baseline_mean)): NaNs produced
-
-``` r
 ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
   geom_line() +
   geom_hline(yintercept = min_pct_2samp, linetype = "dashed", color = "red") +
@@ -207,12 +167,6 @@ ggplot(detectable_2samp_df, aes(x = n_after, y = min_detectable_percent)) +
     y = "Minimum Detectable Percent Change"
   )
 ```
-
-    ## Warning: Removed 40 rows containing missing values or values outside the scale range
-    ## (`geom_line()`).
-
-    ## Warning: Removed 1 row containing missing values or values outside the scale range
-    ## (`geom_hline()`).
 
 ![](TwoSampleTTest_files/figure-html/unnamed-chunk-10-1.png)
 

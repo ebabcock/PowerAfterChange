@@ -58,7 +58,10 @@ ignoring within-site correlation.</p>
 <span>  <span class="va">sd_pooled</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  S_grid <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">50</span></span>
+<span>  S_grid <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">50</span>,</span>
+<span>  typeTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span>, <span class="st">"arcsin"</span><span class="op">)</span>,</span>
+<span>  addValue <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  baseline_mean <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -82,11 +85,14 @@ the function will calculate power for a fixed number of sites before and varying
 
 
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
-<dd><p>Hypothesized mean change (absolute, on the scale of the response)</p></dd>
+<dd><p>Hypothesized mean change (absolute, on the original untransformed
+scale of the response). When <code>typeTransform</code> is not <code>"none"</code>,
+this value is converted to the transformed scale internally using
+<code>find_desired_change</code> before computing power.</p></dd>
 
 
 <dt id="arg-sd-pooled">sd_pooled<a class="anchor" aria-label="anchor" href="#arg-sd-pooled"></a></dt>
-<dd><p>Standard deviation among all samples</p></dd>
+<dd><p>Standard deviation among all samples (on the transformed scale)</p></dd>
 
 
 <dt id="arg-target-power">target_power<a class="anchor" aria-label="anchor" href="#arg-target-power"></a></dt>
@@ -99,6 +105,23 @@ the function will calculate power for a fixed number of sites before and varying
 
 <dt id="arg-s-grid">S_grid<a class="anchor" aria-label="anchor" href="#arg-s-grid"></a></dt>
 <dd><p>Grid of site numbers to evaluate (default 2:50)</p></dd>
+
+
+<dt id="arg-typetransform">typeTransform<a class="anchor" aria-label="anchor" href="#arg-typetransform"></a></dt>
+<dd><p>Character indicating the transformation applied to the
+response variable before analysis. One of <code>"none"</code>, <code>"log"</code>,
+<code>"sqrt"</code>, or <code>"arcsin"</code> for arcsin(sqrt) (default <code>"none"</code>).</p></dd>
+
+
+<dt id="arg-addvalue">addValue<a class="anchor" aria-label="anchor" href="#arg-addvalue"></a></dt>
+<dd><p>Value added to the response variable before transforming, to
+avoid issues with zeros (default 0). Ignored for <code>"arcsin"</code>.</p></dd>
+
+
+<dt id="arg-baseline-mean">baseline_mean<a class="anchor" aria-label="anchor" href="#arg-baseline-mean"></a></dt>
+<dd><p>Mean of the original (untransformed) response variable
+before the change. Required when <code>typeTransform</code> is not <code>"none"</code>
+in order to convert <code>delta</code> to the transformed scale.</p></dd>
 
 </dl></div>
     <div class="section level2">
