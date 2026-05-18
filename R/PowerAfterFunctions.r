@@ -853,12 +853,22 @@ find_min_detectable_percent_2samp <- function(S,
 #' constant in the analysis. Defaults to NULL, which allows the number of sites
 #' before and after to vary in the calculation. If S_before is provided,
 #' the function will calculate power for a fixed number of sites before and varying number of sites after.
-#' @param delta Hypothesized mean change (absolute, on the scale of the response)
-#' @param sd_pooled Standard deviation among all samples
+#' @param delta Hypothesized mean change (absolute, on the original untransformed
+#'   scale of the response). When \code{typeTransform} is not \code{"none"},
+#'   this value is converted to the transformed scale internally using
+#'   \code{find_desired_change} before computing power.
+#' @param sd_pooled Standard deviation among all samples (on the transformed scale)
 #' @param target_power Desired power level (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #' @param S_grid Grid of site numbers to evaluate (default 2:50)
-#'
+#' @param typeTransform Character indicating the transformation applied to the
+#'   response variable before analysis. One of \code{"none"}, \code{"log"},
+#'   \code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).
+#' @param addValue Value added to the response variable before transforming, to
+#'   avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.
+#' @param baseline_mean Mean of the original (untransformed) response variable
+#'   before the change. Required when \code{typeTransform} is not \code{"none"}
+#'   in order to convert \code{delta} to the transformed scale.
 #'
 #' @returns A list with `S_star` (minimum sites for target power) and `curve`
 #'   (data frame of S and power). If nB and nA are the number of years before
@@ -875,15 +885,48 @@ find_min_sites_2samp <- function(nB, nA,
                                  sd_pooled,
                                  target_power = 0.8,
                                  alpha = 0.05,
-                                 S_grid = 2:50) {
+                                 S_grid = 2:50,
+                                 typeTransform = c("none", "log", "sqrt", "arcsin"),
+                                 addValue = 0,
+                                 baseline_mean = NULL) {
+  typeTransform <- match.arg(typeTransform)
+
+  if (typeTransform != "none" && is.null(baseline_mean)) {
+    stop("baseline_mean must be provided when typeTransform is not 'none'.")
+  }
+  if (typeTransform == "log" && !is.null(baseline_mean) && baseline_mean + addValue <= 0) {
+    stop("baseline_mean + addValue must be > 0 when typeTransform is 'log'.")
+  }
+  if (typeTransform == "sqrt" && !is.null(baseline_mean) && baseline_mean + addValue < 0) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
+  }
+  if (typeTransform == "arcsin" && !is.null(baseline_mean) &&
+      (baseline_mean < 0 || baseline_mean > 1)) {
+    stop("baseline_mean must be in [0, 1] when typeTransform is 'arcsin'.")
+  }
+
+  # Convert delta from the original scale to the transformed scale if needed
+  if (typeTransform == "none") {
+    delta_t <- delta
+  } else {
+    delta_t <- find_desired_change(
+      change_type    = "absolute",
+      change_value   = delta,
+      baseline_mean  = baseline_mean,
+      typeTransform  = typeTransform,
+      addValue       = addValue
+    )
+  }
+
   if (is.null(S_before)) {
-   pow <- sapply(S_grid, function(S) {
-    power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
-   }) } else { #if fixed sites before
-     pow <- sapply(S_grid, function(S) {
-       power_2samp_analytical(S_before * nB, S * nA, delta, sd_pooled, alpha)
-     })
-   }
+    pow <- sapply(S_grid, function(S) {
+      power_2samp_analytical(S * nB, S * nA, delta_t, sd_pooled, alpha)
+    })
+  } else {
+    pow <- sapply(S_grid, function(S) {
+      power_2samp_analytical(S_before * nB, S * nA, delta_t, sd_pooled, alpha)
+    })
+  }
   out    <- data.frame(S = S_grid, power = pow)
   S_star <- out$S[which(out$power >= target_power)[1]]
   list(S_star = S_star, curve = out)
@@ -899,30 +942,73 @@ find_min_sites_2samp <- function(nB, nA,
 #' @param S_before Number of sites before, if you wish to keep this number
 #' constant in the analysis. Defaults to NULL, which keeps S sites before and after.
 #' @param nB Number of before measurements per site
-#' @param delta Hypothesized mean change
-#' @param sd_pooled Standard deviation among all samples
+#' @param delta Hypothesized mean change (absolute, on the original untransformed
+#'   scale of the response). When \code{typeTransform} is not \code{"none"},
+#'   this value is converted to the transformed scale internally using
+#'   \code{find_desired_change} before computing power.
+#' @param sd_pooled Standard deviation among all samples (on the transformed scale)
 #' @param target_power Desired power level (default 0.8)
 #' @param alpha Significance level (default 0.05)
 #' @param n_grid Grid of after measurements to evaluate (default 1:50)
+#' @param typeTransform Character indicating the transformation applied to the
+#'   response variable before analysis. One of \code{"none"}, \code{"log"},
+#'   \code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).
+#' @param addValue Value added to the response variable before transforming, to
+#'   avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.
+#' @param baseline_mean Mean of the original (untransformed) response variable
+#'   before the change. Required when \code{typeTransform} is not \code{"none"}
+#'   in order to convert \code{delta} to the transformed scale.
 #'
 #' @returns A list with `n_star` (minimum after measurements for target power)
 #'   and `curve` (data frame of n_after and power)
 #' @export
 find_n_after_2samp <- function(S,
-                               S_before=NULL,
+                               S_before = NULL,
                                nB,
                                delta,
                                sd_pooled,
                                target_power = 0.8,
                                alpha = 0.05,
-                               n_grid = 1:50) {
-  if(is.null(S_before)){
-   pow <- sapply(n_grid, function(nA) {
-    power_2samp_analytical(S * nB, S * nA, delta, sd_pooled, alpha)
-  })
+                               n_grid = 1:50,
+                               typeTransform = c("none", "log", "sqrt", "arcsin"),
+                               addValue = 0,
+                               baseline_mean = NULL) {
+  typeTransform <- match.arg(typeTransform)
+
+  if (typeTransform != "none" && is.null(baseline_mean)) {
+    stop("baseline_mean must be provided when typeTransform is not 'none'.")
+  }
+  if (typeTransform == "log" && !is.null(baseline_mean) && baseline_mean + addValue <= 0) {
+    stop("baseline_mean + addValue must be > 0 when typeTransform is 'log'.")
+  }
+  if (typeTransform == "sqrt" && !is.null(baseline_mean) && baseline_mean + addValue < 0) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
+  }
+  if (typeTransform == "arcsin" && !is.null(baseline_mean) &&
+      (baseline_mean < 0 || baseline_mean > 1)) {
+    stop("baseline_mean must be in [0, 1] when typeTransform is 'arcsin'.")
+  }
+
+  # Convert delta from the original scale to the transformed scale if needed
+  if (typeTransform == "none") {
+    delta_t <- delta
+  } else {
+    delta_t <- find_desired_change(
+      change_type   = "absolute",
+      change_value  = delta,
+      baseline_mean = baseline_mean,
+      typeTransform = typeTransform,
+      addValue      = addValue
+    )
+  }
+
+  if (is.null(S_before)) {
+    pow <- sapply(n_grid, function(nA) {
+      power_2samp_analytical(S * nB, S * nA, delta_t, sd_pooled, alpha)
+    })
   } else {
     pow <- sapply(n_grid, function(nA) {
-      power_2samp_analytical(S_before * nB, S * nA, delta, sd_pooled, alpha)
+      power_2samp_analytical(S_before * nB, S * nA, delta_t, sd_pooled, alpha)
     })
   }
   out    <- data.frame(n_after = n_grid, power = pow)

@@ -101,12 +101,12 @@ res_nb_w <- find_n_after(
   nbinom_disp = nbinom_disp
 )
 
-#This is a test based on GLMM. It is slow so use few sims
+#This is a test based on GLMM. It is slow so use few sims for demo
 res_nb_g <- find_n_after(
   S = S_demo, nB = nB_demo,
   delta = delta_target_nb, sd_w = sd_w, sd_d = sd_d,
   target_power = 0.8, alpha = alpha, n_grid = n_grid,
-  nsim = 100, seed = 4,
+  nsim = 10, seed = 4,
   distribution = "nbinom",
   useTest = "GLMM-NB",
   nbinom_mu = nbinom_mu,

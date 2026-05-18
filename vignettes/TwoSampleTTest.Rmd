@@ -79,7 +79,8 @@ sites_2samp <- find_min_sites_2samp(
   target_power = 0.8, alpha = 0.05,
   S_grid = 2:50,
   typeTransform="none",
-  addValue=0
+  addValue=0,
+  baseline_mean = before_mean
 )
 sites_2samp$S_star
 ```
@@ -102,7 +103,10 @@ n_after_2samp <- find_n_after_2samp(
   delta = delta_target,
   sd_pooled  = sd_total,
   target_power = 0.8, alpha = 0.05,
-  n_grid = 1:40
+  n_grid = 1:40,
+  typeTransform="none",
+  addValue=0,
+  baseline_mean = before_mean
 )
 n_after_2samp$n_star
 ```
