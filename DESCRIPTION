@@ -19,6 +19,6 @@ Depends:
 LazyData: true
 URL: https://ebabcock.github.io/PowerAfterChange/
 Suggests: 
-    knitr, rmarkdown
+    knitr, rmarkdown, glmmTMB
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
