@@ -59,7 +59,7 @@ after measurements, ignoring within-site correlation.</p>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  n_grid <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">50</span>,</span>
-<span>  typeTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span>, <span class="st">"arcsin"</span><span class="op">)</span>,</span>
+<span>  typeTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span>, <span class="st">"asin"</span><span class="op">)</span>,</span>
 <span>  addValue <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  baseline_mean <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -108,12 +108,12 @@ this value is converted to the transformed scale internally using
 <dt id="arg-typetransform">typeTransform<a class="anchor" aria-label="anchor" href="#arg-typetransform"></a></dt>
 <dd><p>Character indicating the transformation applied to the
 response variable before analysis. One of <code>"none"</code>, <code>"log"</code>,
-<code>"sqrt"</code>, or <code>"arcsin"</code> for arcsin(sqrt) (default <code>"none"</code>).</p></dd>
+<code>"sqrt"</code>, or <code>"asin"</code> for asin(sqrt) (default <code>"none"</code>).</p></dd>
 
 
 <dt id="arg-addvalue">addValue<a class="anchor" aria-label="anchor" href="#arg-addvalue"></a></dt>
 <dd><p>Value added to the response variable before transforming, to
-avoid issues with zeros (default 0). Ignored for <code>"arcsin"</code>.</p></dd>
+avoid issues with zeros (default 0). Ignored for <code>"asin"</code>.</p></dd>
 
 
 <dt id="arg-baseline-mean">baseline_mean<a class="anchor" aria-label="anchor" href="#arg-baseline-mean"></a></dt>

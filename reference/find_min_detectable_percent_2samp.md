@@ -16,7 +16,7 @@ find_min_detectable_percent_2samp(
   baseline_mean,
   target_power = 0.8,
   alpha = 0.05,
-  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  typeTransform = c("none", "log", "sqrt", "asin"),
   addValue = 0
 )
 ```
@@ -65,12 +65,12 @@ find_min_detectable_percent_2samp(
 
   Character indicating the transformation applied to the response
   variable before analysis. One of `"none"`, `"log"`, `"sqrt"`, or
-  `"arcsin"` for arcsin(sqrt) (default `"none"`).
+  `"asin"` for asin(sqrt) (default `"none"`).
 
 - addValue:
 
   Value added to the response variable before transforming, to avoid
-  issues with zeros (default 0). Ignored for `"arcsin"`.
+  issues with zeros (default 0). Ignored for `"asin"`.
 
 ## Value
 
