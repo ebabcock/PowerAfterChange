@@ -13,7 +13,7 @@ find_n_after_2samp(
   target_power = 0.8,
   alpha = 0.05,
   n_grid = 1:50,
-  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  typeTransform = c("none", "log", "sqrt", "asin"),
   addValue = 0,
   baseline_mean = NULL
 )
@@ -41,10 +41,10 @@ this value is converted to the transformed scale internally using
 
 \item{typeTransform}{Character indicating the transformation applied to the
 response variable before analysis. One of \code{"none"}, \code{"log"},
-\code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).}
+\code{"sqrt"}, or \code{"asin"} for asin(sqrt) (default \code{"none"}).}
 
 \item{addValue}{Value added to the response variable before transforming, to
-avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.}
+avoid issues with zeros (default 0). Ignored for \code{"asin"}.}
 
 \item{baseline_mean}{Mean of the original (untransformed) response variable
 before the change. Required when \code{typeTransform} is not \code{"none"}

@@ -382,7 +382,7 @@ power_for_nA_analytical <- function(nA, S, nB, delta, sd_within, sd_delta, alpha
 #' @param siteVar Name of the site variable in baseline data
 #' @param responseVar Name of the response variable in baseline data
 #' @param groupVar Optional character vector of grouping variables to summarize by
-#' @param typeTansform Character indicating transformation the response variable, "none","log", "sqrt", or "arcsin" for arcsin(sqrt) (default "none")"
+#' @param typeTansform Character indicating transformation the response variable, "none","log", "sqrt", or "asin" for asin(sqrt) (default "none")"
 #' @param addValue Value to add to response variable before transforming (default 0)
 #'
 #' @returns A data frame containing the estimated mean and standard deviation of the
@@ -409,7 +409,7 @@ summarize_baseline <- function(baseline,
   # Set flags based on typeTransform
   logTransform   <- typeTransform == "log"
   sqrtTransform  <- typeTransform == "sqrt"
-  asinTransform  <- typeTransform == "arcsin"
+  asinTransform  <- typeTransform == "asin"
 
   returnVal <-  baseline %>%
     group_by(across(all_of(c(group_syms)))) %>%
@@ -432,7 +432,7 @@ summarize_baseline <- function(baseline,
       site_logsd      = if_else(logTransform, sd(log(!!sym(responseVar) + addValue)), NA_real_),
       site_sqrtmean   = if_else(sqrtTransform, mean(sqrt(!!sym(responseVar) + addValue)), NA_real_),
       site_sqrtsd     = if_else(sqrtTransform, sd(sqrt(!!sym(responseVar) + addValue)), NA_real_),
-      # New Site Arcsin
+      # New Site asin
       site_asinmean   = if_else(asinTransform, mean(asin(sqrt(!!sym(responseVar)))), NA_real_),
       site_asinsd     = if_else(asinTransform, sd(asin(sqrt(!!sym(responseVar)))), NA_real_),
       prop_positive_site = mean(!!sym(responseVar) > 0),
@@ -448,7 +448,7 @@ summarize_baseline <- function(baseline,
       logsd_between   = if_else(logTransform, sd(site_logmean), NA_real_),
       sqrtsd_within   = if_else(sqrtTransform, mean(site_sqrtsd), NA_real_),
       sqrtsd_between  = if_else(sqrtTransform, sd(site_sqrtmean), NA_real_),
-      # New Arcsin variance components
+      # New asin variance components
       asinsd_within   = if_else(asinTransform, mean(site_asinsd), NA_real_),
       asinsd_between  = if_else(asinTransform, sd(site_asinmean), NA_real_),
       prop_positive   = mean(prop_positive_site),
@@ -491,7 +491,7 @@ summarize_baseline <- function(baseline,
 find_desired_change <- function(change_type,
                                 change_value,
                                 baseline_mean,
-                                typeTransform = c("none", "log", "sqrt", "arcsin"),
+                                typeTransform = c("none", "log", "sqrt", "asin"),
                                 addValue = 0) {
   typeTransform <- match.arg(typeTransform)
 
@@ -508,13 +508,13 @@ find_desired_change <- function(change_type,
   changed  <- baseline_mean + abs_change
 
   # 2. Define the transformation functions
-  # Note: Arcsin usually ignores addValue as it must stay within [0,1]
+  # Note: asin usually ignores addValue as it must stay within [0,1]
   transform_fun <- switch(
     typeTransform,
     none   = function(x) x,
     log    = function(x) log(x + addValue),
     sqrt   = function(x) sqrt(x + addValue),
-    arcsin = function(x) asin(sqrt(x))
+    asin = function(x) asin(sqrt(x))
   )
 
   # 3. Calculate values on the transformed scale
@@ -538,7 +538,7 @@ find_desired_change <- function(change_type,
 #' @param sd_within Within-site standard deviation (log calculated if logTransform=TRUE)
 #' @param sd_delta Between-site SD of true changes (default 0)
 #' @param typeTransform Character indicating the transformation to apply to the response
-#'  variable, one of "none", "log", or "sqrt" (default "none").
+#'  variable, one of "none", "log", "asin" or "sqrt" (default "none").
 #' @param addValue Value to add to response variable before transforming to avoid issues
 #' @param baseline_mean Mean of the original response variable before the change.
 #'   Required when typeTransform is "log" or "sqrt" to convert percent change back to original scale.
@@ -552,7 +552,7 @@ find_min_detectable_percent <- function(S,
                                         nA,
                                         sd_within = NA,
                                         sd_delta = 0,
-                                        typeTransform = c("none", "log", "sqrt"),
+                                        typeTransform = c("none", "log", "sqrt","asin"),
                                         addValue = 0,
                                         baseline_mean = NULL,
                                         target_power = 0.8,
@@ -567,6 +567,9 @@ find_min_detectable_percent <- function(S,
     stop("baseline_mean + addValue must be > 0 when typeTransform is 'log'.")
   }
   if (typeTransform == "sqrt" && baseline_mean + addValue < 0) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
+  }
+  if (typeTransform == "asin" && ((baseline_mean < 0) || (baseline_mean + addValue > 1))) {
     stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
 
@@ -594,12 +597,14 @@ find_min_detectable_percent <- function(S,
     transform_fun <- switch(
       typeTransform,
       log  = function(x) log(x),
-      sqrt = function(x) sqrt(x)
+      sqrt = function(x) sqrt(x),
+      asin = function(x) asin(sqrt(x))
     )
     inv_transform_fun <- switch(
       typeTransform,
       log  = function(x) exp(x),
-      sqrt = function(x) x^2
+      sqrt = function(x) x^2,
+      asin = function(x) (sin(x))^2
     )
 
     baseline_t <- transform_fun(baseline_mean + addValue)
@@ -628,7 +633,7 @@ find_min_detectable_percent <- function(S,
 #' @param sd_delta Standard deviation of true changes among sites
 #' @param alpha Significance level
 #' @param typeTransform Character indicating the transformation to apply to the response
-#'  variable, one of "none", "log", or "sqrt" (default "none").
+#'  variable, one of "none", "log","asin" or "sqrt" (default "none").
 #' @param addValue Value to add to response variable before transforming to avoid issues
 #'
 #' @returns Power for the given percent change
@@ -642,7 +647,7 @@ power_for_percent_change <- function(percent_change,
                                      sd_within,
                                      sd_delta,
                                      alpha,
-                                     typeTransform = c("none", "log", "sqrt"),
+                                     typeTransform = c("none", "log","asin", "sqrt"),
                                      addValue = 0) {
   typeTransform <- match.arg(typeTransform)
 
@@ -655,7 +660,9 @@ power_for_percent_change <- function(percent_change,
   if (typeTransform == "sqrt" && baseline_mean + addValue < 0) {
     stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
-
+  if (typeTransform == "asin" && ((baseline_mean < 0) || (baseline_mean + addValue > 1))) {
+    stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
+  }
   before <- baseline_mean
   after <- baseline_mean * (1 + percent_change / 100)
 
@@ -665,7 +672,8 @@ power_for_percent_change <- function(percent_change,
     transform_fun <- switch(
       typeTransform,
       log  = function(x) log(x),
-      sqrt = function(x) sqrt(x)
+      sqrt = function(x) sqrt(x),
+      asin = function(x) asin(sqrt(x))
     )
     delta <- transform_fun(after + addValue) - transform_fun(before + addValue)
   }
@@ -758,9 +766,9 @@ power_for_n_after_2samp <- function(S, nB, nA,
 #' @param alpha Significance level (default 0.05)
 #' @param typeTransform Character indicating the transformation applied to the
 #'   response variable before analysis. One of \code{"none"}, \code{"log"},
-#'   \code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).
+#'   \code{"sqrt"}, or \code{"asin"} for asin(sqrt) (default \code{"none"}).
 #' @param addValue Value added to the response variable before transforming, to
-#'   avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.
+#'   avoid issues with zeros (default 0). Ignored for \code{"asin"}.
 #'
 #' @returns The minimum detectable percentage change (e.g., 30 for a 30% change)
 #' @export
@@ -771,7 +779,7 @@ find_min_detectable_percent_2samp <- function(S,
                                               baseline_mean,
                                               target_power = 0.8,
                                               alpha = 0.05,
-                                              typeTransform = c("none", "log", "sqrt", "arcsin"),
+                                              typeTransform = c("none", "log", "sqrt", "asin"),
                                               addValue = 0) {
   typeTransform <- match.arg(typeTransform)
 
@@ -787,8 +795,8 @@ find_min_detectable_percent_2samp <- function(S,
   if (typeTransform == "sqrt" && baseline_mean + addValue < 0) {
     stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
-  if (typeTransform == "arcsin" && (baseline_mean < 0 || baseline_mean > 1)) {
-    stop("baseline_mean must be in [0, 1] when typeTransform is 'arcsin'.")
+  if (typeTransform == "asin" && (baseline_mean < 0 || baseline_mean > 1)) {
+    stop("baseline_mean must be in [0, 1] when typeTransform is 'asin'.")
   }
 
   if (is.null(S_before)) {
@@ -803,7 +811,7 @@ find_min_detectable_percent_2samp <- function(S,
     none   = max(abs(baseline_mean) * 10, 5),
     log    = 10,
     sqrt   = 10,
-    arcsin = pi / 2 - 1e-6   # asin(sqrt(x)) range is [0, pi/2]
+    asin = pi / 2 - 1e-6   # asin(sqrt(x)) range is [0, pi/2]
   )
 
   # 1. Find the required delta on the transformed scale
@@ -830,7 +838,7 @@ find_min_detectable_percent_2samp <- function(S,
     after          <- changed_t^2 - addValue
     detectable_pct <- ((after - baseline_mean) / baseline_mean) * 100
 
-  } else if (typeTransform == "arcsin") {
+  } else if (typeTransform == "asin") {
     baseline_t     <- asin(sqrt(baseline_mean))
     new_mean_t     <- baseline_t + delta_t_required
     new_mean       <- sin(new_mean_t)^2
@@ -863,9 +871,9 @@ find_min_detectable_percent_2samp <- function(S,
 #' @param S_grid Grid of site numbers to evaluate (default 2:50)
 #' @param typeTransform Character indicating the transformation applied to the
 #'   response variable before analysis. One of \code{"none"}, \code{"log"},
-#'   \code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).
+#'   \code{"sqrt"}, or \code{"asin"} for asin(sqrt) (default \code{"none"}).
 #' @param addValue Value added to the response variable before transforming, to
-#'   avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.
+#'   avoid issues with zeros (default 0). Ignored for \code{"asin"}.
 #' @param baseline_mean Mean of the original (untransformed) response variable
 #'   before the change. Required when \code{typeTransform} is not \code{"none"}
 #'   in order to convert \code{delta} to the transformed scale.
@@ -886,7 +894,7 @@ find_min_sites_2samp <- function(nB, nA,
                                  target_power = 0.8,
                                  alpha = 0.05,
                                  S_grid = 2:50,
-                                 typeTransform = c("none", "log", "sqrt", "arcsin"),
+                                 typeTransform = c("none", "log", "sqrt", "asin"),
                                  addValue = 0,
                                  baseline_mean = NULL) {
   typeTransform <- match.arg(typeTransform)
@@ -900,9 +908,9 @@ find_min_sites_2samp <- function(nB, nA,
   if (typeTransform == "sqrt" && !is.null(baseline_mean) && baseline_mean + addValue < 0) {
     stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
-  if (typeTransform == "arcsin" && !is.null(baseline_mean) &&
+  if (typeTransform == "asin" && !is.null(baseline_mean) &&
       (baseline_mean < 0 || baseline_mean > 1)) {
-    stop("baseline_mean must be in [0, 1] when typeTransform is 'arcsin'.")
+    stop("baseline_mean must be in [0, 1] when typeTransform is 'asin'.")
   }
 
   # Convert delta from the original scale to the transformed scale if needed
@@ -952,9 +960,9 @@ find_min_sites_2samp <- function(nB, nA,
 #' @param n_grid Grid of after measurements to evaluate (default 1:50)
 #' @param typeTransform Character indicating the transformation applied to the
 #'   response variable before analysis. One of \code{"none"}, \code{"log"},
-#'   \code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).
+#'   \code{"sqrt"}, or \code{"asin"} for asin(sqrt) (default \code{"none"}).
 #' @param addValue Value added to the response variable before transforming, to
-#'   avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.
+#'   avoid issues with zeros (default 0). Ignored for \code{"asin"}.
 #' @param baseline_mean Mean of the original (untransformed) response variable
 #'   before the change. Required when \code{typeTransform} is not \code{"none"}
 #'   in order to convert \code{delta} to the transformed scale.
@@ -970,7 +978,7 @@ find_n_after_2samp <- function(S,
                                target_power = 0.8,
                                alpha = 0.05,
                                n_grid = 1:50,
-                               typeTransform = c("none", "log", "sqrt", "arcsin"),
+                               typeTransform = c("none", "log", "sqrt", "asin"),
                                addValue = 0,
                                baseline_mean = NULL) {
   typeTransform <- match.arg(typeTransform)
@@ -984,9 +992,9 @@ find_n_after_2samp <- function(S,
   if (typeTransform == "sqrt" && !is.null(baseline_mean) && baseline_mean + addValue < 0) {
     stop("baseline_mean + addValue must be >= 0 when typeTransform is 'sqrt'.")
   }
-  if (typeTransform == "arcsin" && !is.null(baseline_mean) &&
+  if (typeTransform == "asin" && !is.null(baseline_mean) &&
       (baseline_mean < 0 || baseline_mean > 1)) {
-    stop("baseline_mean must be in [0, 1] when typeTransform is 'arcsin'.")
+    stop("baseline_mean must be in [0, 1] when typeTransform is 'asin'.")
   }
 
   # Convert delta from the original scale to the transformed scale if needed

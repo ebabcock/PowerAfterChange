@@ -50,7 +50,7 @@
 <span>  <span class="va">nA</span>,</span>
 <span>  sd_within <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  sd_delta <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  typeTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span><span class="op">)</span>,</span>
+<span>  typeTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span>, <span class="st">"asin"</span><span class="op">)</span>,</span>
 <span>  addValue <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  baseline_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_power <span class="op">=</span> <span class="fl">0.8</span>,</span>
@@ -84,7 +84,7 @@
 
 <dt id="arg-typetransform">typeTransform<a class="anchor" aria-label="anchor" href="#arg-typetransform"></a></dt>
 <dd><p>Character indicating the transformation to apply to the response
-variable, one of "none", "log", or "sqrt" (default "none").</p></dd>
+variable, one of "none", "log", "asin" or "sqrt" (default "none").</p></dd>
 
 
 <dt id="arg-addvalue">addValue<a class="anchor" aria-label="anchor" href="#arg-addvalue"></a></dt>

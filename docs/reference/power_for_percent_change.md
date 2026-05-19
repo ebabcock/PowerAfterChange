@@ -16,7 +16,7 @@ power_for_percent_change(
   sd_within,
   sd_delta,
   alpha,
-  typeTransform = c("none", "log", "sqrt"),
+  typeTransform = c("none", "log", "asin", "sqrt"),
   addValue = 0
 )
 ```
@@ -58,7 +58,7 @@ power_for_percent_change(
 - typeTransform:
 
   Character indicating the transformation to apply to the response
-  variable, one of "none", "log", or "sqrt" (default "none").
+  variable, one of "none", "log","asin" or "sqrt" (default "none").
 
 - addValue:
 

@@ -16,7 +16,7 @@ find_min_sites_2samp(
   target_power = 0.8,
   alpha = 0.05,
   S_grid = 2:50,
-  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  typeTransform = c("none", "log", "sqrt", "asin"),
   addValue = 0,
   baseline_mean = NULL
 )
@@ -67,12 +67,12 @@ find_min_sites_2samp(
 
   Character indicating the transformation applied to the response
   variable before analysis. One of `"none"`, `"log"`, `"sqrt"`, or
-  `"arcsin"` for arcsin(sqrt) (default `"none"`).
+  `"asin"` for asin(sqrt) (default `"none"`).
 
 - addValue:
 
   Value added to the response variable before transforming, to avoid
-  issues with zeros (default 0). Ignored for `"arcsin"`.
+  issues with zeros (default 0). Ignored for `"asin"`.
 
 - baseline_mean:
 

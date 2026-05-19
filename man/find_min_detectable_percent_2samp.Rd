@@ -13,7 +13,7 @@ find_min_detectable_percent_2samp(
   baseline_mean,
   target_power = 0.8,
   alpha = 0.05,
-  typeTransform = c("none", "log", "sqrt", "arcsin"),
+  typeTransform = c("none", "log", "sqrt", "asin"),
   addValue = 0
 )
 }
@@ -41,10 +41,10 @@ convert the detectable absolute delta back to a percent change.}
 
 \item{typeTransform}{Character indicating the transformation applied to the
 response variable before analysis. One of \code{"none"}, \code{"log"},
-\code{"sqrt"}, or \code{"arcsin"} for arcsin(sqrt) (default \code{"none"}).}
+\code{"sqrt"}, or \code{"asin"} for asin(sqrt) (default \code{"none"}).}
 
 \item{addValue}{Value added to the response variable before transforming, to
-avoid issues with zeros (default 0). Ignored for \code{"arcsin"}.}
+avoid issues with zeros (default 0). Ignored for \code{"asin"}.}
 }
 \value{
 The minimum detectable percentage change (e.g., 30 for a 30\% change)

@@ -10,7 +10,7 @@ find_min_detectable_percent(
   nA,
   sd_within = NA,
   sd_delta = 0,
-  typeTransform = c("none", "log", "sqrt"),
+  typeTransform = c("none", "log", "sqrt", "asin"),
   addValue = 0,
   baseline_mean = NULL,
   target_power = 0.8,
@@ -29,7 +29,7 @@ find_min_detectable_percent(
 \item{sd_delta}{Between-site SD of true changes (default 0)}
 
 \item{typeTransform}{Character indicating the transformation to apply to the response
-variable, one of "none", "log", or "sqrt" (default "none").}
+variable, one of "none", "log", "asin" or "sqrt" (default "none").}
 
 \item{addValue}{Value to add to response variable before transforming to avoid issues}
 
